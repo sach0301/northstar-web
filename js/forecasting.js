@@ -53,9 +53,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const absVal = Math.abs(val);
     let formatted = '';
     if (absVal >= 100000) {
-      formatted = `₹${(absVal / 100000).toStringAsFixed(1)}L`;
+      formatted = `₹${(absVal / 100000).toFixed(1)}L`;
     } else if (absVal >= 1000) {
-      formatted = `₹${(absVal / 1000).toStringAsFixed(1)}K`;
+      formatted = `₹${(absVal / 1000).toFixed(1)}K`;
     } else {
       formatted = `₹${absVal.toFixed(0)}`;
     }
