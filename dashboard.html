@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics Dashboard — Northstar Platform</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- TOP NAVIGATION BAR -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="nav-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+      <span>Northstar</span>
+    </a>
+    
+    <div class="nav-menu" id="nav-menu">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="upload.html" class="nav-link">Upload</a>
+      <a href="dashboard.html" class="nav-link active">Dashboard</a>
+      <a href="forecasting.html" class="nav-link">Forecasting</a>
+      <a href="recommendations.html" class="nav-link">AI Recommendations</a>
+      <a href="chat.html" class="nav-link">AI Business Chat</a>
+    </div>
+
+    <button class="nav-toggle" id="nav-toggle">
+      <i data-lucide="menu"></i>
+    </button>
+  </nav>
+
+  <!-- EMPTY STATE OVERLAY (IF NO FILE UPLOADED) -->
+  <div class="container" id="empty-state" style="display: none; padding-top: 80px; text-align: center;">
+    <div class="glass-card" style="max-width: 600px; margin: 0 auto; padding: 50px 30px;">
+      <i data-lucide="bar-chart-2" style="width: 64px; height: 64px; color: var(--text-muted); margin-bottom: 20px;"></i>
+      <h3 style="font-size: 1.5rem; margin-bottom: 12px;">No Business Data Loaded</h3>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 30px;">
+        To view your sales performance, inventory alerts, and product metrics, please upload your operations spreadsheet.
+      </p>
+      <div style="display: flex; gap: 15px; justify-content: center;">
+        <a href="upload.html" class="btn btn-primary">
+          <i data-lucide="upload"></i>
+          Upload Excel File
+        </a>
+        <button class="btn btn-secondary" id="btn-load-demo">
+          Load Demo Data
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN DASHBOARD CONTENT -->
+  <main class="container" id="dashboard-content" style="display: none;">
+    
+    <!-- DASHBOARD HEADER -->
+    <header class="dashboard-header">
+      <div class="dashboard-title-group">
+        <h2 id="dashboard-title">Operational Analytics</h2>
+        <p id="dashboard-subtitle">June 2026 reporting metrics synced from <span id="sync-file-name" style="color: var(--accent-light); font-weight: 600;">template.xlsx</span></p>
+      </div>
+      <div>
+        <a href="upload.html" class="btn btn-secondary btn-sm">
+          <i data-lucide="refresh-cw"></i>
+          Sync New File
+        </a>
+      </div>
+    </header>
+
+    <!-- KPI METRICS GRID -->
+    <section class="kpi-grid">
+      <!-- Card 1: Revenue -->
+      <div class="glass-card kpi-card">
+        <div class="kpi-card-header">
+          <span>Total Revenue</span>
+          <i data-lucide="indian-rupee"></i>
+        </div>
+        <div class="kpi-card-value" id="kpi-revenue">₹0.0</div>
+        <div class="kpi-card-trend trend-up">
+          <i data-lucide="trending-up"></i>
+          <span>Synced</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Expenses -->
+      <div class="glass-card kpi-card">
+        <div class="kpi-card-header">
+          <span>Total Expenses</span>
+          <i data-lucide="wallet"></i>
+        </div>
+        <div class="kpi-card-value" id="kpi-expenses">₹0.0</div>
+        <div class="kpi-card-trend trend-down">
+          <i data-lucide="trending-down"></i>
+          <span>Cash outflow</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Profit -->
+      <div class="glass-card kpi-card" id="card-profit">
+        <div class="kpi-card-header">
+          <span>Net Profit</span>
+          <i data-lucide="percent"></i>
+        </div>
+        <div class="kpi-card-value" id="kpi-profit">₹0.0</div>
+        <div class="kpi-card-trend" id="kpi-profit-trend">
+          <span>Profit Margin</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Orders -->
+      <div class="glass-card kpi-card">
+        <div class="kpi-card-header">
+          <span>Total Orders</span>
+          <i data-lucide="shopping-bag"></i>
+        </div>
+        <div class="kpi-card-value" id="kpi-orders">0</div>
+        <div class="kpi-card-trend" style="color: var(--text-muted);">
+          <span>Average Order Value</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHARTS GRID -->
+    <section class="chart-grid">
+      <!-- Daily Sales Line Chart -->
+      <div class="glass-card chart-card-full">
+        <h3>Daily Sales Revenue Trend</h3>
+        <div class="chart-container">
+          <canvas id="dailySalesChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Product Share Doughnut Chart -->
+      <div class="glass-card">
+        <h3>Product Revenue Share</h3>
+        <div class="chart-container">
+          <canvas id="productShareChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Inventory Metrics Bar Chart -->
+      <div class="glass-card">
+        <h3>Inventory Health Snapshot</h3>
+        <div class="chart-container">
+          <canvas id="inventoryChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- METADATA GRID (TABLES & INSIGHTS) -->
+    <section class="dashboard-meta-grid">
+      <!-- Product Performance Table -->
+      <div class="glass-card">
+        <h3>Product Sales Breakdown</h3>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Units Sold</th>
+                <th>Revenue Generated</th>
+                <th>Contribution</th>
+              </tr>
+            </thead>
+            <tbody id="product-table-body">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- BI Insights Panel -->
+      <div class="glass-card">
+        <h3>AI-Generated Data Insights</h3>
+        <div class="insights-list" id="insights-container">
+          <!-- Dynamically populated items -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>&copy; 2026 Northstar Platform. All rights reserved.</p>
+  </footer>
+
+  <!-- ICON LIBS & CHARTS -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>lucide.createIcons();</script>
+  <script type="module" src="js/ui.js"></script>
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>

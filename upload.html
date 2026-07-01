@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Data — Northstar Platform</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- TOP NAVIGATION BAR -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="nav-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+      <span>Northstar</span>
+    </a>
+    
+    <div class="nav-menu" id="nav-menu">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="upload.html" class="nav-link active">Upload</a>
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="forecasting.html" class="nav-link">Forecasting</a>
+      <a href="recommendations.html" class="nav-link">AI Recommendations</a>
+      <a href="chat.html" class="nav-link">AI Business Chat</a>
+    </div>
+
+    <button class="nav-toggle" id="nav-toggle">
+      <i data-lucide="menu"></i>
+    </button>
+  </nav>
+
+  <!-- CONTENT CONTAINER -->
+  <main class="container">
+    <div style="margin-bottom: 30px;">
+      <h2 style="font-size: 2rem;">Upload Your Business Data</h2>
+      <p style="color: var(--text-secondary);">Sync your sales, products, expenses, and inventory data instantly.</p>
+    </div>
+
+    <div class="upload-wrapper">
+      <!-- Left side: Dropzone -->
+      <section class="glass-card" style="padding: 40px;">
+        <div class="dropzone-container" id="dropzone">
+          <input type="file" id="file-input" accept=".xlsx,.csv" style="display: none;">
+          <div class="dropzone-icon">
+            <i data-lucide="upload-cloud" style="width: 60px; height: 60px;"></i>
+          </div>
+          <h3 class="dropzone-title">Drag & drop your Excel file here</h3>
+          <p class="dropzone-subtitle">Supports .xlsx and .csv files (max 10MB)</p>
+          <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+            <i data-lucide="folder-open"></i>
+            Select File
+          </button>
+        </div>
+
+        <!-- Upload Progress indicator -->
+        <div class="progress-container" id="progress-container" style="display: none;">
+          <div class="progress-info">
+            <span id="upload-status-text">Uploading files...</span>
+            <span id="upload-percentage">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress-bar-fill"></div>
+          </div>
+        </div>
+
+        <!-- Error/Success notifications -->
+        <div id="toast-wrapper"></div>
+      </section>
+
+      <!-- Right side: Instructions & Download Template -->
+      <section class="glass-card" style="display: flex; flex-direction: column; gap: 24px;">
+        <div>
+          <h3 style="font-size: 1.25rem; margin-bottom: 12px;">Get Started with Our Template</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+            Download our pre-formatted spreadsheet template. It contains sample rows and structured headers for Sales, Products, Expenses, and Inventory.</p>
+          <a href="assets/template.xlsx" class="btn btn-secondary" style="width: 100%;" download>
+            <i data-lucide="download"></i>
+            Download Excel Template
+          </a>
+        </div>
+
+        <div class="file-specs">
+          <h4 style="font-size: 1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 8px;">Upload Instructions</h4>
+          
+          <div class="spec-item">
+            <i data-lucide="check-circle-2"></i>
+            <div>
+              <h5>Use the correct sheets</h5>
+              <p>Keep the sheet names exactly as 'Sales Data', 'Product Data', 'Expenses', and 'Inventory'.</p>
+            </div>
+          </div>
+
+          <div class="spec-item">
+            <i data-lucide="check-circle-2"></i>
+            <div>
+              <h5>Use exact product names</h5>
+              <p>Ensure product names match exactly across different sheets (e.g. 'Dosa' vs 'dosa').</p>
+            </div>
+          </div>
+
+          <div class="spec-item">
+            <i data-lucide="check-circle-2"></i>
+            <div>
+              <h5>One-click sync</h5>
+              <p>You do not need to upload sheets separately. Upload the entire .xlsx file directly.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>&copy; 2026 Northstar Platform. All rights reserved.</p>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+  <script type="module" src="js/ui.js"></script>
+  <script type="module" src="js/upload.js"></script>
+</body>
+</html>

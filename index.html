@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Northstar — AI-Powered Business Intelligence & Forecasting for SMEs</title>
+  <meta name="description" content="Manage your operations, simulate sales forecasts, and unlock AI recommendations for your SME using Northstar.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- TOP NAVIGATION BAR -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="nav-brand">
+      <!-- Lucide Brand Icon Vector -->
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+      <span>Northstar</span>
+    </a>
+    
+    <div class="nav-menu" id="nav-menu">
+      <a href="index.html" class="nav-link active">Home</a>
+      <a href="upload.html" class="nav-link">Upload</a>
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="forecasting.html" class="nav-link">Forecasting</a>
+      <a href="recommendations.html" class="nav-link">AI Recommendations</a>
+      <a href="chat.html" class="nav-link">AI Business Chat</a>
+    </div>
+
+    <button class="nav-toggle" id="nav-toggle">
+      <i data-lucide="menu"></i>
+    </button>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <header class="container hero-section">
+    <div class="hero-glow"></div>
+    <div class="hero-badge">
+      <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i>
+      Introducing Northstar V2.0 Web Platform
+    </div>
+    <h1 class="hero-title">AI-Powered Business Intelligence & Forecasting for SMEs</h1>
+    <p class="hero-subtitle">
+      Upload your monthly operations spreadsheet, instantly visualize financial health scores, and obtain machine learning projections to optimize cashflow.
+    </p>
+    <div class="hero-cta">
+      <a href="upload.html" class="btn btn-primary">
+        Get Started
+        <i data-lucide="arrow-right"></i>
+      </a>
+      <a href="upload.html" class="btn btn-secondary">Download Excel Template</a>
+    </div>
+  </header>
+
+  <!-- FEATURES SECTION -->
+  <main class="container">
+    <h2 class="section-title">Turn Spreadsheets Into Growth</h2>
+    <p class="section-subtitle">SMEs use Northstar to automate reporting, predict seasonal drops, and cut overhead costs.</p>
+    
+    <div class="features-grid">
+      <!-- Feature Card 1 -->
+      <div class="glass-card feature-card">
+        <div class="feature-icon">
+          <i data-lucide="file-spreadsheet"></i>
+        </div>
+        <h3>One-Click Excel Sync</h3>
+        <p>Upload a single master Excel workbook. Our advanced parser synchronizes Sales, Products, Expenses, and Inventory sheets instantly.</p>
+      </div>
+
+      <!-- Feature Card 2 -->
+      <div class="glass-card feature-card">
+        <div class="feature-icon">
+          <i data-lucide="bar-chart-3"></i>
+        </div>
+        <h3>Interactive Dashboard</h3>
+        <p>Analyze revenue trends, customer segments, top performing product margins, and cash outflows through premium BI KPI visualizations.</p>
+      </div>
+
+      <!-- Feature Card 3 -->
+      <div class="glass-card feature-card">
+        <div class="feature-icon">
+          <i data-lucide="trending-up"></i>
+        </div>
+        <h3>ML-Powered Forecasting</h3>
+        <p>Project future sales performance and cash reserves 30 days out with confidence intervals using advanced forecasting models.</p>
+      </div>
+
+      <!-- Feature Card 4 -->
+      <div class="glass-card feature-card">
+        <div class="feature-icon">
+          <i data-lucide="brain"></i>
+        </div>
+        <h3>Actionable AI Copilot</h3>
+        <p>Get structured SWOT reports, priority actions, and chat live with an AI business co-pilot to model scenarios and optimize staff schedules.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- WORKFLOW DIAGRAM -->
+  <section class="workflow-section">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-subtitle">A seamless workflow designed for busy business owners</p>
+      
+      <div class="workflow-steps">
+        <div class="workflow-step">
+          <div class="step-num">1</div>
+          <h4>Download Template</h4>
+          <p>Get our formatted Excel sheet with pre-made headers.</p>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num">2</div>
+          <h4>Input Your Data</h4>
+          <p>Enter your daily sales, products sold, and monthly expenses.</p>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num">3</div>
+          <h4>Upload and Analyze</h4>
+          <p>Drag and drop the sheet. Metrics compile in seconds.</p>
+        </div>
+        <div class="workflow-step">
+          <div class="step-num">4</div>
+          <h4>Optimize Cashflow</h4>
+          <p>Receive ML predictions and AI pricing & scheduling advice.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>&copy; 2026 Northstar Platform. All rights reserved. Designed for professional SME business intelligence.</p>
+  </footer>
+
+  <!-- SVG Gradients -->
+  <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+    <linearGradient id="indigo-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+  </svg>
+
+  <!-- ICON LIBS & SCRIPTS -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    // Initialize icons immediately
+    lucide.createIcons();
+  </script>
+  <script type="module" src="js/ui.js"></script>
+</body>
+</html>

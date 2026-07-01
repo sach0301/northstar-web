@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Recommendations — Northstar Platform</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- TOP NAVIGATION BAR -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="nav-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+      <span>Northstar</span>
+    </a>
+    
+    <div class="nav-menu" id="nav-menu">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="upload.html" class="nav-link">Upload</a>
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="forecasting.html" class="nav-link">Forecasting</a>
+      <a href="recommendations.html" class="nav-link active">AI Recommendations</a>
+      <a href="chat.html" class="nav-link">AI Business Chat</a>
+    </div>
+
+    <button class="nav-toggle" id="nav-toggle">
+      <i data-lucide="menu"></i>
+    </button>
+  </nav>
+
+  <!-- EMPTY STATE OVERLAY -->
+  <div class="container" id="empty-state" style="display: none; padding-top: 80px; text-align: center;">
+    <div class="glass-card" style="max-width: 600px; margin: 0 auto; padding: 50px 30px;">
+      <i data-lucide="brain" style="width: 64px; height: 64px; color: var(--text-muted); margin-bottom: 20px;"></i>
+      <h3 style="font-size: 1.5rem; margin-bottom: 12px;">No Recommendations Found</h3>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 30px;">
+        To generate SWOT matrices, strategic plans, and LLM advice, please upload your Excel sheet first.
+      </p>
+      <a href="upload.html" class="btn btn-primary">
+        <i data-lucide="upload"></i>
+        Upload Excel File
+      </a>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="container" id="loading-state" style="display: none; padding-top: 80px; text-align: center;">
+    <div class="glass-card forecasting-loading-card">
+      <div class="spinner"></div>
+      <h3 style="font-size: 1.55rem; margin-bottom: 12px;">Consulting AI Business Planner</h3>
+      <p style="color: var(--text-secondary); max-width: 500px; font-size: 0.95rem;">
+        Passing your metrics and forecasted sales to our LLM to structure operational priorities, SWOT cards, and pricing models...
+      </p>
+    </div>
+  </div>
+
+  <!-- RECOMMENDATIONS DISPLAY PANEL -->
+  <main class="container" id="rec-content" style="display: none;">
+    <!-- HEADER -->
+    <header class="dashboard-header">
+      <div class="dashboard-title-group">
+        <h2>AI Recommendations & Action Plan</h2>
+        <p>Actionable, structured insights powered by LLM audit on your spreadsheet metrics</p>
+      </div>
+    </header>
+
+    <!-- EXECUTIVE SUMMARY -->
+    <section class="glass-card" style="margin-bottom: 40px; border-left: 4px solid var(--accent-color);">
+      <div style="display: flex; gap: 15px; align-items: start;">
+        <i data-lucide="award" style="color: var(--accent-light); width: 28px; height: 28px; flex-shrink: 0; margin-top: 2px;"></i>
+        <div>
+          <h3 style="font-size: 1.3rem; margin-bottom: 8px;">Executive Summary</h3>
+          <p id="rec-summary" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SWOT ANALYSIS GRID -->
+    <section class="swot-grid">
+      <!-- Strengths -->
+      <div class="glass-card swot-card swot-strengths">
+        <div class="swot-card-header" style="color: var(--success-color);">
+          <i data-lucide="trending-up"></i>
+          <h3>Strengths</h3>
+        </div>
+        <ul class="swot-list" id="swot-strengths-list"></ul>
+      </div>
+
+      <!-- Weaknesses -->
+      <div class="glass-card swot-card swot-weaknesses">
+        <div class="swot-card-header" style="color: var(--error-color);">
+          <i data-lucide="trending-down"></i>
+          <h3>Weaknesses</h3>
+        </div>
+        <ul class="swot-list" id="swot-weaknesses-list"></ul>
+      </div>
+
+      <!-- Opportunities -->
+      <div class="glass-card swot-card swot-opportunities">
+        <div class="swot-card-header" style="color: var(--accent-light);">
+          <i data-lucide="lightbulb"></i>
+          <h3>Opportunities</h3>
+        </div>
+        <ul class="swot-list" id="swot-opportunities-list"></ul>
+      </div>
+
+      <!-- Risks -->
+      <div class="glass-card swot-card swot-risks">
+        <div class="swot-card-header" style="color: var(--warning-color);">
+          <i data-lucide="shield-alert"></i>
+          <h3>Risks</h3>
+        </div>
+        <ul class="swot-list" id="swot-risks-list"></ul>
+      </div>
+    </section>
+
+    <!-- PRIORITY ACTION PLAN -->
+    <section style="margin-bottom: 50px;">
+      <h3 style="font-size: 1.5rem; margin-bottom: 20px; text-align: left;">Priority Action Plan</h3>
+      <div class="features-grid" id="actions-container" style="margin-bottom: 0;">
+        <!-- Action Cards dynamically populated -->
+      </div>
+    </section>
+
+    <!-- STRATEGIC EXPANDABLE PANELS -->
+    <section style="margin-bottom: 40px;">
+      <h3 style="font-size: 1.5rem; margin-bottom: 20px; text-align: left;">Strategic Categories</h3>
+      
+      <div class="accordion">
+        <!-- Panel 1: Pricing -->
+        <div class="glass-card accordion-item">
+          <div class="accordion-header">
+            <span style="display:flex; align-items:center; gap:10px;">
+              <i data-lucide="tags" style="color:var(--accent-light);"></i>
+              Pricing Optimization Suggestions
+            </span>
+            <i data-lucide="chevron-down"></i>
+          </div>
+          <div class="accordion-content">
+            <div class="accordion-content-inner">
+              <p style="color: var(--text-secondary); margin-bottom: 12px;">Based on your current product margins and top-selling items:</p>
+              <ul class="swot-list">
+                <li>Increase Raagi prices by 5% to 8% to capture gross margins. Since Raagi generated ₹14,000 in revenue, demand remains highly inelastic.</li>
+                <li>Bundle Dosa + Idli together as a breakfast combo with a 5% discount to increase Average Order Value (AOV).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 2: Inventory -->
+        <div class="glass-card accordion-item">
+          <div class="accordion-header">
+            <span style="display:flex; align-items:center; gap:10px;">
+              <i data-lucide="package" style="color:var(--accent-light);"></i>
+              Inventory & Supply Chain Recommendations
+            </span>
+            <i data-lucide="chevron-down"></i>
+          </div>
+          <div class="accordion-content">
+            <div class="accordion-content-inner">
+              <p style="color: var(--text-secondary); margin-bottom: 12px;">Ensuring stable supply lines for high-volume items:</p>
+              <ul class="swot-list">
+                <li>Create a backup sourcing contract for batter items. Your high dependency on 'Fresh Bakers Pvt Ltd' is a minor operational risk.</li>
+                <li>Reduce lead times by keeping safety stock buffer levels set to 3 days for Dosa Batter.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel 3: Marketing -->
+        <div class="glass-card accordion-item">
+          <div class="accordion-header">
+            <span style="display:flex; align-items:center; gap:10px;">
+              <i data-lucide="megaphone" style="color:var(--accent-light);"></i>
+              Marketing & Customer Retention Ideas
+            </span>
+            <i data-lucide="chevron-down"></i>
+          </div>
+          <div class="accordion-content">
+            <div class="accordion-content-inner">
+              <p style="color: var(--text-secondary); margin-bottom: 12px;">Driving off-peak orders and increasing brand loyalty:</p>
+              <ul class="swot-list">
+                <li>Run a morning campaign targeting corporate workers with discount codes for online breakfast orders.</li>
+                <li>Establish an inline loyalty program for walk-in customers to keep customer return rates high.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>&copy; 2026 Northstar Platform. All rights reserved.</p>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+  <script type="module" src="js/ui.js"></script>
+  <script type="module" src="js/recommendations.js"></script>
+</body>
+</html>

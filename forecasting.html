@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Forecasting — Northstar Platform</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- TOP NAVIGATION BAR -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="nav-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+      <span>Northstar</span>
+    </a>
+    
+    <div class="nav-menu" id="nav-menu">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="upload.html" class="nav-link">Upload</a>
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="forecasting.html" class="nav-link active">Forecasting</a>
+      <a href="recommendations.html" class="nav-link">AI Recommendations</a>
+      <a href="chat.html" class="nav-link">AI Business Chat</a>
+    </div>
+
+    <button class="nav-toggle" id="nav-toggle">
+      <i data-lucide="menu"></i>
+    </button>
+  </nav>
+
+  <!-- EMPTY STATE OVERLAY -->
+  <div class="container" id="empty-state" style="display: none; padding-top: 80px; text-align: center;">
+    <div class="glass-card" style="max-width: 600px; margin: 0 auto; padding: 50px 30px;">
+      <i data-lucide="trending-up" style="width: 64px; height: 64px; color: var(--text-muted); margin-bottom: 20px;"></i>
+      <h3 style="font-size: 1.5rem; margin-bottom: 12px;">No Forecast Computed</h3>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 30px;">
+        To calculate machine learning sales projections and cash reserves, please upload your data sheet first.
+      </p>
+      <a href="upload.html" class="btn btn-primary">
+        <i data-lucide="upload"></i>
+        Upload Excel File
+      </a>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="container" id="loading-state" style="display: none; padding-top: 80px;">
+    <div class="glass-card forecasting-loading-card">
+      <div class="spinner"></div>
+      <h3 style="font-size: 1.55rem; margin-bottom: 12px;">Generating Predictions</h3>
+      <p style="color: var(--text-secondary); max-width: 500px; font-size: 0.95rem; margin-bottom: 24px;">
+        Running time-series models (Prophet and ARIMA) across your historical rows. This computes seasonal weights and confidence bands.
+      </p>
+      <!-- Loading progress bar -->
+      <div class="progress-bar-bg" style="max-width: 300px; margin: 0 auto;">
+        <div class="progress-bar-fill" id="loading-bar-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORECASTING DISPLAY PANEL -->
+  <main class="container" id="forecast-content" style="display: none;">
+    <!-- HEADER -->
+    <header class="dashboard-header">
+      <div class="dashboard-title-group">
+        <h2>Sales & Cashflow Forecast</h2>
+        <p>Machine learning projections for the next 30 days (July 2026)</p>
+      </div>
+    </header>
+
+    <!-- EVALUATION METRICS CARD GRID -->
+    <section class="kpi-grid">
+      <!-- Sales Projection -->
+      <div class="glass-card kpi-card">
+        <div class="kpi-card-header">
+          <span>Projected Sales</span>
+          <i data-lucide="line-chart"></i>
+        </div>
+        <div class="kpi-card-value" id="forecast-sales">₹0.0</div>
+        <div class="kpi-card-trend trend-up">
+          <i data-lucide="arrow-up-right"></i>
+          <span id="forecast-sales-trend">+0.0% vs June</span>
+        </div>
+      </div>
+
+      <!-- Expense Projection -->
+      <div class="glass-card kpi-card">
+        <div class="kpi-card-header">
+          <span>Projected Expenses</span>
+          <i data-lucide="wallet"></i>
+        </div>
+        <div class="kpi-card-value" id="forecast-expenses">₹0.0</div>
+        <div class="kpi-card-trend" id="forecast-expense-trend" style="color: var(--text-muted);">
+          <span>+0.0% vs June</span>
+        </div>
+      </div>
+
+      <!-- Cashflow Health -->
+      <div class="glass-card kpi-card">
+        <div class="kpi-card-header">
+          <span>Cashflow Health</span>
+          <i data-lucide="alert-circle"></i>
+        </div>
+        <div class="kpi-card-value" id="forecast-cashflow" style="font-size: 1.5rem; line-height: 1.4; font-weight: 700; color: var(--warning-color);">Stable</div>
+        <div class="kpi-card-trend" style="color: var(--text-secondary);">
+          <span>Based on projected margins</span>
+        </div>
+      </div>
+
+      <!-- Best Model -->
+      <div class="glass-card kpi-card">
+        <div class="kpi-card-header">
+          <span>Top Performing Model</span>
+          <i data-lucide="cpu"></i>
+        </div>
+        <div class="kpi-card-value" id="forecast-model" style="font-size: 1.45rem; line-height: 1.4; font-weight: 700; color: var(--accent-light);">ARIMA</div>
+        <div class="kpi-card-trend" style="color: var(--text-secondary);">
+          <span>Auto-selected by accuracy</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORECAST CHART SECTION -->
+    <section class="glass-card chart-card-full" style="margin-bottom: 40px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3>Sales Forecast Timeline (30 Days)</h3>
+        <span style="color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+          <span style="display:inline-block; width:12px; height:12px; background:rgba(99, 102, 241, 0.15); border:1px dashed var(--accent-light);"></span>
+          95% Confidence Interval Band
+        </span>
+      </div>
+      <div class="chart-container" style="height: 380px;">
+        <canvas id="forecastChart"></canvas>
+      </div>
+    </section>
+
+    <!-- ACCURACY METRICS & INSIGHTS -->
+    <section class="dashboard-meta-grid">
+      <!-- Accuracy Metrics Card -->
+      <div class="glass-card">
+        <h3>Model Evaluation Metrics</h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 15px;">Statistical error markers comparing training sets.</p>
+        
+        <div class="model-eval-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 0;">
+          <div class="glass-card eval-card">
+            <span>MAE</span>
+            <div class="eval-value" id="metric-mae">0.0</div>
+            <p style="color:var(--text-muted); font-size: 0.75rem; margin-top:2px;">Mean Abs Error</p>
+          </div>
+          <div class="glass-card eval-card">
+            <span>RMSE</span>
+            <div class="eval-value" id="metric-rmse">0.0</div>
+            <p style="color:var(--text-muted); font-size: 0.75rem; margin-top:2px;">Root Mean Sq Error</p>
+          </div>
+          <div class="glass-card eval-card" style="margin-top:20px;">
+            <span>MAPE</span>
+            <div class="eval-value" id="metric-mape">0.0</div>
+            <p style="color:var(--text-muted); font-size: 0.75rem; margin-top:2px;">Mean Abs % Error</p>
+          </div>
+          <div class="glass-card eval-card" style="margin-top:20px;">
+            <span>WAPE</span>
+            <div class="eval-value" id="metric-wape">0.0</div>
+            <p style="color:var(--text-muted); font-size: 0.75rem; margin-top:2px;">Weighted Abs % Error</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Forecast Insights -->
+      <div class="glass-card">
+        <h3>Forecasting Insights</h3>
+        <div class="insights-list" id="forecast-insights-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>&copy; 2026 Northstar Platform. All rights reserved.</p>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>lucide.createIcons();</script>
+  <script type="module" src="js/ui.js"></script>
+  <script type="module" src="js/forecasting.js"></script>
+</body>
+</html>

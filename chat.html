@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Co-Pilot Chat — Northstar Platform</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- TOP NAVIGATION BAR -->
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="nav-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+      <span>Northstar</span>
+    </a>
+    
+    <div class="nav-menu" id="nav-menu">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="upload.html" class="nav-link">Upload</a>
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
+      <a href="forecasting.html" class="nav-link">Forecasting</a>
+      <a href="recommendations.html" class="nav-link">AI Recommendations</a>
+      <a href="chat.html" class="nav-link active">AI Business Chat</a>
+    </div>
+
+    <button class="nav-toggle" id="nav-toggle">
+      <i data-lucide="menu"></i>
+    </button>
+  </nav>
+
+  <!-- CHAT CONTAINER PANEL -->
+  <main class="container chat-wrapper">
+    <!-- Message Bubbles Panel -->
+    <div class="glass-card chat-container-panel" id="chat-messages-container">
+      <!-- Welcome message -->
+      <div class="chat-msg chat-msg-bot">
+        <div class="chat-avatar">
+          <i data-lucide="bot" style="width: 18px; height: 18px; color: var(--accent-light);"></i>
+        </div>
+        <div class="chat-bubble">
+          Hello! I am your Northstar AI Business Co-pilot. Ask me anything about your product sales, forecasting projections, or expense scheduling. 
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Input & Suggestions Panel -->
+    <div class="chat-input-panel">
+      <!-- Suggestion chips -->
+      <div class="chat-suggestion-chips">
+        <button class="suggestion-chip">What are my main strengths?</button>
+        <button class="suggestion-chip">Why is cashflow critical?</button>
+        <button class="suggestion-chip">Project sales for July</button>
+        <button class="suggestion-chip">How can I optimize Cook schedules?</button>
+      </div>
+
+      <!-- Main Input Field -->
+      <form class="chat-input-form" id="chat-input-form">
+        <!-- Clear chat button -->
+        <button type="button" class="btn btn-secondary" id="btn-clear-chat" style="padding: 10px; border-radius: var(--radius-sm); border:0; background:none;" title="Clear Chat History">
+          <i data-lucide="trash-2" style="width: 20px; height: 20px; color:var(--text-muted);"></i>
+        </button>
+        
+        <input type="text" class="chat-text-input" id="chat-text-input" placeholder="Ask your business co-pilot..." autocomplete="off">
+        
+        <!-- Submit button -->
+        <button type="submit" class="btn btn-primary" style="padding: 10px 16px; border-radius: var(--radius-md);">
+          <i data-lucide="send" style="width: 18px; height: 18px;"></i>
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>&copy; 2026 Northstar Platform. All rights reserved.</p>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>lucide.createIcons();</script>
+  <script type="module" src="js/ui.js"></script>
+  <script type="module" src="js/chat.js"></script>
+</body>
+</html>
