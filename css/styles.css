@@ -1081,7 +1081,7 @@ a {
     position: fixed;
     top: 70px;
     left: -100%;
-    right: 0;
+    width: 100%;
     bottom: 0;
     height: calc(100vh - 70px);
     background: var(--bg-secondary);
