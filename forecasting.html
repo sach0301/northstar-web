@@ -137,6 +137,25 @@
       </div>
     </section>
 
+    <!-- PRODUCT FORECAST CHART SECTION -->
+    <section class="glass-card chart-card-full" style="margin-bottom: 40px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
+        <div>
+          <h3>Product Demand Projections (14 Days)</h3>
+          <p style="color: var(--text-secondary); font-size: 0.82rem; margin-top: 2px;">Select an individual menu item to view its forecasted daily sales volume.</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">SELECT PRODUCT:</label>
+          <select id="product-forecast-select" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--card-border); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-family: var(--font-body); font-size: 0.88rem; min-width: 150px;">
+            <!-- Options dynamically loaded -->
+          </select>
+        </div>
+      </div>
+      <div class="chart-container" style="height: 320px;">
+        <canvas id="productForecastChart"></canvas>
+      </div>
+    </section>
+
     <!-- ACCURACY METRICS & INSIGHTS -->
     <section class="dashboard-meta-grid">
       <!-- Accuracy Metrics Card -->
@@ -197,7 +216,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>lucide.createIcons();</script>
-  <script type="module" src="js/ui.js"></script>
-  <script type="module" src="js/forecasting.js"></script>
+  <script type="module" src="js/ui.js?v=1.2"></script>
+  <script type="module" src="js/forecasting.js?v=1.2"></script>
 </body>
 </html>

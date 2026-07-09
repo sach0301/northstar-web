@@ -1,59 +1,9 @@
 import { CONFIG } from './config.js';
 import { STATE } from './state.js';
 
-// MOCK API FALLBACK SEEDS (Used for local offline testing or cold-start fallback)
-const MOCK_ANALYSIS_RESPONSE = {
-  "Sales Analysis": {
-    "selected_model": "Prophet (Additive Regression)",
-    "evaluation_metrics": { "MAE": "124.50", "RMSE": "182.20", "MAPE": "4.8%", "WAPE": "5.1%" },
-    "forecast": [
-      { "Date": "Jul 1", "prediction": 33800, "lower_bound": 32000, "upper_bound": 35000 },
-      { "Date": "Jul 2", "prediction": 34200, "lower_bound": 32200, "upper_bound": 36200 },
-      { "Date": "Jul 3", "prediction": 35000, "lower_bound": 33000, "upper_bound": 37000 },
-      { "Date": "Jul 4", "prediction": 35800, "lower_bound": 33500, "upper_bound": 38000 },
-      { "Date": "Jul 5", "prediction": 36400, "lower_bound": 34000, "upper_bound": 38800 },
-      { "Date": "Jul 6", "prediction": 37200, "lower_bound": 34800, "upper_bound": 39600 },
-      { "Date": "Jul 7", "prediction": 37800, "lower_bound": 35000, "upper_bound": 40500 }
-    ]
-  },
-  "Product Analysis": {
-    "Forecast_14_Days": {
-      "Dosa": [
-        { "Date": "Jul 1", "prediction": 125, "lower_bound": 110, "upper_bound": 140 },
-        { "Date": "Jul 2", "prediction": 130, "lower_bound": 115, "upper_bound": 145 }
-      ],
-      "Idli": [
-        { "Date": "Jul 1", "prediction": 155, "lower_bound": 140, "upper_bound": 170 },
-        { "Date": "Jul 2", "prediction": 160, "lower_bound": 145, "upper_bound": 175 }
-      ]
-    }
-  },
-  "Expense Analysis": {
-    "fixed_costs": 165000,
-    "variable_costs": 105000,
-    "ratio": "61% Fixed / 39% Variable"
-  },
-  "Inventory Analysis": {
-    "sku_details": [
-      { "sku": "Dosa Batter", "stock_coverage_days": 4, "recommended_reorder": 120, "urgency": "HIGH" },
-      { "sku": "Idli Batter", "stock_coverage_days": 8, "recommended_reorder": 80, "urgency": "MEDIUM" },
-      { "sku": "Sambhar Pow", "stock_coverage_days": 22, "recommended_reorder": 0, "urgency": "LOW" }
-    ]
-  },
-  "Anomalies": [
-    { "type": "Drop", "date": "04/06/2026", "change": "-18%", "reason": "Heavy thunderstorm local area lockdown" }
-  ],
-  "Business Health": {
-    "score": 88
-  },
-  "Business Insights": {
-    "Top_10_AI_Recommendations": [
-      { "title": "Slightly Increase Raagi Menu Pricing", "desc": "Raagi demand shows price inelasticity. Raise pricing by 5-8% to capture premium margins." },
-      { "title": "Optimize Cooking Staff Shift Schedules", "desc": "Restrict second helper hours strictly to peak breakfast (7:30 AM) and dinner slots." },
-      { "title": "Create Combo Packs for Afternoon Slots", "desc": "Offer discounted Dosa + Drink meals to lift stagnant afternoon revenues." }
-    ]
-  }
-};
+// Pre-baked demo fallback data used only if there is no active session data uploaded
+const PREBAKED_DEMO_REVENUE = 145000;
+const PREBAKED_DEMO_EXPENSES = 159000;
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -71,11 +21,84 @@ function formatCurrency(val) {
   return isNegative ? `-${formatted}` : formatted;
 }
 
+// Dynamically compile a mock analysis payload matching the uploaded spreadsheet values
+function generateDynamicMockAnalysis() {
+  const rev = STATE.dashboardData?.raw_revenue || PREBAKED_DEMO_REVENUE;
+  const exp = STATE.dashboardData?.raw_expenses || PREBAKED_DEMO_EXPENSES;
+  const profit = rev - exp;
+  const margin = rev > 0 ? ((profit / rev) * 100).toFixed(1) : '0';
+  
+  const topProd = STATE.dashboardData?.top_product || 'Burger';
+  const lowStockItem = (STATE.dashboardData?.inventory_status || []).find(item => item.currentStock < item.reorderLevel);
+  const lowStockName = lowStockItem ? lowStockItem.sku : 'Pasta Item';
+
+  const rentVal = STATE.dashboardData?.expenses_breakdown?.rent || 65000;
+  const salariesVal = STATE.dashboardData?.expenses_breakdown?.salaries || 85000;
+
+  return {
+    "Sales Analysis": {
+      "selected_model": "Auto-Regressive Drift Model (Fallback)",
+      "evaluation_metrics": { "MAE": "184.20", "RMSE": "210.50", "MAPE": "6.4%", "WAPE": "6.8%" },
+      "Forecast_14_Days": [] // Handled dynamically in forecasting.js using seasonal factors
+    },
+    "Product Analysis": {
+      "Forecast_14_Days": {} // Compiled dynamically per product in forecasting.js
+    },
+    "Expense Analysis": {
+      "fixed_costs": rentVal + salariesVal,
+      "variable_costs": exp - (rentVal + salariesVal),
+      "ratio": `${(((rentVal + salariesVal) / exp) * 100).toFixed(0)}% Fixed / ${(((exp - (rentVal + salariesVal)) / exp) * 100).toFixed(0)}% Variable`
+    },
+    "Inventory Analysis": {
+      "sku_details": (STATE.dashboardData?.inventory_status || []).map(item => ({
+        "sku": item.sku,
+        "stock_coverage_days": Math.round(item.currentStock / 15),
+        "recommended_reorder": item.currentStock < item.reorderLevel ? item.reorderLevel - item.currentStock : 0,
+        "urgency": item.currentStock < item.reorderLevel ? "HIGH" : "LOW"
+      }))
+    },
+    "Anomalies": [
+      { "type": "Drop", "date": "10/06/2026", "change": "-15%", "reason": "Mid-week weather disruption" }
+    ],
+    "Business Health": {
+      "business_score": exp > rev ? 36 : 85
+    },
+    "Business Insights": {
+      "SWOT": {
+        "Strengths": [
+          "Consistent product sales contribution",
+          `High volume product demand led by ${topProd}`
+        ],
+        "Weaknesses": [
+          "High operational overheads",
+          `Negative cashflow margin from total logged expenses of ${formatCurrency(exp)}`
+        ],
+        "Opportunities": [
+          "Optimize staff shifts during off-peak hours",
+          "Bundle top menu items together for combos"
+        ],
+        "Risks": [
+          `Stockout risk on low stock item ${lowStockName}`,
+          "High reliance on key supplier for kitchen batter"
+        ]
+      },
+      "Top_10_AI_Recommendations": [
+        `Increase production and marketing of top-selling products, which account for the bulk of your sales.`,
+        `Optimize pricing strategy to reduce the average discount rate and raise margins.`,
+        `Implement a targeted marketing campaign on weekends to capitalize on peak demand.`,
+        `Reduce salaries expense by 10% from ${formatCurrency(salariesVal)} to ${formatCurrency(salariesVal * 0.9)} and renegotiate rent from ${formatCurrency(rentVal)} to ${formatCurrency(rentVal * 0.9)}.`,
+        `Streamline inventory purchase processes to decrease the expense burn.`,
+        `Reorder ${lowStockName} immediately to prevent stockouts and ensure continuous supply chain.`
+      ]
+    }
+  };
+}
+
 export const API = {
   async runFullAnalysis(file, tuningMethod = 'fast') {
     if (CONFIG.apiBaseUrl === 'mock') {
       await delay(2500);
-      return MOCK_ANALYSIS_RESPONSE;
+      return generateDynamicMockAnalysis();
     }
 
     const formData = new FormData();
@@ -98,7 +121,7 @@ export const API = {
       console.warn('API error encountered. Checking mock fallback availability:', err);
       if (CONFIG.useMockFallback) {
         await delay(1500);
-        return MOCK_ANALYSIS_RESPONSE;
+        return generateDynamicMockAnalysis();
       }
       throw err;
     }
@@ -178,10 +201,10 @@ function generateLocalMockReply(question, isFallback = false) {
   const prefix = isFallback ? `**[System Note: Co-pilot running in simulated mode during server spin up]**\n\n` : '';
 
   // Extract active metrics dynamically from STATE
-  const rev = STATE.dashboardData?.raw_revenue || 58205;
-  const exp = STATE.dashboardData?.raw_expenses || 270000;
+  const rev = STATE.dashboardData?.raw_revenue || PREBAKED_DEMO_REVENUE;
+  const exp = STATE.dashboardData?.raw_expenses || PREBAKED_DEMO_EXPENSES;
   const profit = rev - exp;
-  const margin = rev > 0 ? ((profit / rev) * 100).toFixed(1) : '-371.6';
+  const margin = rev > 0 ? ((profit / rev) * 100).toFixed(1) : '0';
   
   const formattedRev = formatCurrency(rev);
   const formattedExp = formatCurrency(exp);

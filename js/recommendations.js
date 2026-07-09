@@ -204,11 +204,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       finalMetrics = { MAE: '184.20', RMSE: '210.50', MAPE: '6.4%', WAPE: '6.8%' };
       
       const lastHistRevenue = STATE.dashboardData?.raw_revenue / STATE.dashboardData?.daily_sales.length || 8000;
-      finalForecastTotal = lastHistRevenue * 14;
+      finalForecastTotal = 0;
+      
+      const startDay = new Date();
       for (let i = 1; i <= 14; i++) {
-        const tempPred = lastHistRevenue * (1 + (i * 0.005)) + (Math.sin(i) * 500);
+        const nextDate = new Date();
+        nextDate.setDate(startDay.getDate() + i);
+        
+        const dayOfWeek = nextDate.getDay();
+        let factor = 0.85; // Weekday dip
+        if (dayOfWeek === 0 || dayOfWeek === 6 || dayOfWeek === 5) {
+          factor = 1.35; // Weekend peak!
+        }
+        
+        const noise = 0.95 + Math.random() * 0.1;
+        const tempPred = lastHistRevenue * factor * noise;
+        
+        finalForecastTotal += tempPred;
+        
         finalForecastChart.push({
-          date: `${i + 7}/06`,
+          date: nextDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' }),
           revenue: Math.round(tempPred),
           confidence_low: Math.round(tempPred * 0.85),
           confidence_high: Math.round(tempPred * 1.15)
