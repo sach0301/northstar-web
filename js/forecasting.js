@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const loadingState = document.getElementById('loading-state');
   const forecastContent = document.getElementById('forecast-content');
   const loadingBarFill = document.getElementById('loading-bar-fill');
+  let productChartInstance = null;
 
   // Check upload state
   if (!STATE.isUploaded) {
@@ -137,8 +138,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderForecastChart(data.forecast_chart_data);
     initProductForecast(data);
   }
-
-  let productChartInstance = null;
 
   function initProductForecast(data) {
     const selectEl = document.getElementById('product-forecast-select');
