@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       forecast_chart_data: finalForecastChart,
       insights: [
         { title: 'AI Trend Alignment', desc: `Sales projections indicate total expected revenues of ₹${(finalForecastTotal / 1000).toFixed(1)}K.` },
-        { title: 'Model Evaluation Complete', desc: `The AI evaluated ARIMA and Prophet models; selected ${finalSelectedModel} based on MAPE metric.` }
+        { title: 'Model Evaluation Complete', desc: `The AI evaluated multiple time-series configurations and selected the optimal Ensemble Model.` }
       ]
     };
 

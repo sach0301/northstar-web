@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (progress <= 90) {
         analysisProgressBar.style.width = `${progress}%`;
         if (progress > 50) {
-          analysisLoadingText.textContent = 'Fitting ARIMA & Prophet models... almost ready.';
+          analysisLoadingText.textContent = 'Running Ensemble Forecasting... almost ready.';
         }
       }
     }, 400);
