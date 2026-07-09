@@ -161,7 +161,7 @@ function generateLocalMockReply(question, isFallback = false) {
   const query = question.toLowerCase();
   let replyText = '';
   
-  const prefix = isFallback ? `> [!NOTE]\n> Your Render AI Chat endpoint is currently spinning up. Here is a co-pilot response based on your metrics:\n\n` : '';
+  const prefix = isFallback ? `**[System Note: Co-pilot running in simulated mode during server spin up]**\n\n` : '';
 
   if (query.includes('strength') || query.includes('positive') || query.includes('good')) {
     replyText = `### Your Business Strengths
@@ -187,7 +187,7 @@ Analyzing your expenses breakdown (totaling ₹2.9L):
   else if (query.includes('sales') || query.includes('forecast') || query.includes('project')) {
     replyText = `### Sales Projections (July 2026)
 *  **Projections**: The model expects sales to total **₹3.7L** for the next 30 days.
-*  **Trend**: Projections align with historical weekend peaks. 
+*  **Timeframe**: July 1st to July 30th, 2026.
 *  **Action Item**: Keep inventory safety stock buffers set to 3 days to capture the projected growth without inventory decay.`;
   }
   else {
