@@ -222,58 +222,80 @@ function generateLocalMockReply(question, isFallback = false) {
     ? `${lowStockItem.sku} is currently at ${lowStockItem.currentStock} units (below the reorder level of ${lowStockItem.reorderLevel} units).`
     : `All inventory items are currently healthy and fully stocked.`;
 
+  // Get dynamic product info
+  const products = STATE.dashboardData?.product_performance || [
+    { name: 'Burger', revenue: 46500, units: 435 },
+    { name: 'Pizza', revenue: 28500, units: 285 }
+  ];
+  const topProdName = products[0]?.name || 'Burger';
+  const topProdRev = formatCurrency(products[0]?.revenue || 46500);
+  const secondProdName = products[1]?.name || 'Pizza';
+  const secondProdRev = formatCurrency(products[1]?.revenue || 28500);
+
+  // Get dynamic expenses
+  const rentAmt = STATE.dashboardData?.expenses_breakdown?.rent || 20000;
+  const salariesAmt = STATE.dashboardData?.expenses_breakdown?.salaries || 30000;
+  const formattedRent = formatCurrency(rentAmt);
+  const formattedSalaries = formatCurrency(salariesAmt);
+
   if (/\b(shut|shuy|shyt|close|stop|exit|quit|abandon|fail)\b/i.test(query) || query.includes('shuy') || query.includes('shyt')) {
     replyText = `### Strategic Business Recommendation
-**Recommendation: Do not close the business yet.**
-*  **Strong Revenues**: Your business has logged **${formattedRev}** in sales against **${formattedExp}** in expenses, yielding a net profit of **${formattedProfit}** (Margin: **${margin}%**).
-*  **Demand Growth**: The product demand is strong, especially for Burger (₹46.5K) and Pizza (₹28.5K).
-*  **Opportunity**: Focus on renegotiating fixed costs (like rent or staff salaries) and optimizing prices before deciding to shut down operations. You are highly profitable in this test!`;
+**Recommendation: Review your overhead cost structure.**
+*  **Revenues vs Expenses**: Your business has logged **${formattedRev}** in sales against **${formattedExp}** in expenses, yielding a net profit of **${formattedProfit}**.
+*  **Demand Growth**: Product demand is strong, especially for ${topProdName} (${topProdRev}) and ${secondProdName} (${secondProdRev}).
+*  **Opportunity**: Focus on reducing fixed overheads (Salaries and Rent) to return to profitability.`;
+  }
+  else if (/\b(current\s+sales|total\s+sales|historical\s+sales|actual\s+sales|sales\s+as\s+of|sales\s+so\s+far)\b/i.test(query)) {
+    replyText = `### Current Sales & Orders Summary
+Based on your uploaded spreadsheet data:
+*  **Total Revenue**: **${formattedRev}** (across the logged sales period).
+*  **Total Orders**: **${STATE.dashboardData?.raw_orders || 785} orders** processed.
+*  **Average Order Value (AOV)**: **₹${((STATE.dashboardData?.raw_revenue || 65000) / (STATE.dashboardData?.raw_orders || 785)).toFixed(2)}** per order.
+*  **Top Performer**: ${topProdName} generated the highest revenue at **${topProdRev}**.`;
   }
   else if (/\b(status|look|perform|overall|health|summary|business|how\s+is)\b/i.test(query)) {
     replyText = `### Business Health Overview
 Based on your uploaded rows, here is how your business is currently looking:
-*  **Total Revenue**: **${formattedRev}** (healthy sales volume across 750 orders).
+*  **Total Revenue**: **${formattedRev}** (sales volume across ${STATE.dashboardData?.raw_orders || 785} orders).
 *  **Total Expenses**: **${formattedExp}** (primarily Rent and Salaries).
 *  **Net Profit**: **${formattedProfit}** (Operating margin is **${margin}%**).
 *  **Inventory Alert**: ${alertText}
-Overall, your business is in a **profitable and healthy position**!`;
+Overall, focus on reducing overheads to push the margin to positive territory!`;
   }
   else if (/\b(strength|good|positive|advantage)\b/i.test(query)) {
     replyText = `### Your Business Strengths
 Based on your uploaded logs, here are your key operational advantages:
-*  **High Sales Contribution**: Your top products drive substantial demand, with Burger contributing **₹46.5K (56.7%)** and Pizza contributing **₹28.5K (34.8%)** to your total revenues.
-*  **Healthy Cash Position**: You are running a net cash surplus of **${formattedProfit}** with a strong operating profit margin of **${margin}%**.
-*  **Order Frequency**: You processed a total of **750 orders** across the logged period, indicating strong, active customer traffic.`;
+*  **High Sales Contribution**: Your top products drive substantial demand, with ${topProdName} contributing **${topProdRev}** and ${secondProdName} contributing **${secondProdRev}** to your total revenues.
+*  **Order Frequency**: You processed a total of **${STATE.dashboardData?.raw_orders || 785} orders** indicating strong, active customer traffic.`;
   } 
   else if (/\b(expense|salary|salaries|rent|cost|spend|reduce|burn)\b/i.test(query)) {
     replyText = `### Cost & Overhead Analysis
 Reviewing your monthly expenses breakdown (totaling **${formattedExp}**):
-*  **Fixed Overheads**: Rent (₹20,000) and Salaries (₹30,000) represent the largest portion of your monthly expense baseline.
+*  **Fixed Overheads**: Rent (${formattedRent}) and Salaries (${formattedSalaries}) represent the largest portion of your monthly expense baseline.
 *  **Dynamic Cost Action**: 
-   *  Reduce salaries by 10% (saving ₹3,000) by optimizing staff shifts.
-   *  Renegotiate rent by 5% (saving ₹1,000) to decrease your monthly burn to ₹27.5K.
-*  **Current Profit Buffer**: You still maintain a positive net cash buffer of **${formattedProfit}**.`;
+   *  Reduce Salaries by 10% (saving ${formatCurrency(salariesAmt * 0.1)}) by optimizing staff shifts.
+   *  Renegotiate Rent by 5% (saving ${formatCurrency(rentAmt * 0.05)}) to decrease monthly burn.`;
   }
-  else if (/\b(price|pricing|menu|burger|pizza|dosa|idli|combo)\b/i.test(query)) {
+  else if (/\b(price|pricing|menu|chicken|hummus|pasta|burger|pizza|dosa|idli|combo)\b/i.test(query)) {
     replyText = `### Menu & Pricing Insights
 Analyzing your top-selling products:
-*  **Burger**: Generated **₹46.5K** across **435 units** (contributing 56.7% of total revenue).
-*  **Pizza**: Generated **₹28.5K** across **285 units** (contributing 34.8% of total revenue).
+*  **${topProdName}**: Generated **${topProdRev}** (contributing to total revenue).
+*  **${secondProdName}**: Generated **${secondProdRev}** (contributing to total revenue).
 *  **Strategic Price Action**:
-   *  Consider bundling Burger + Pizza as a weekend combo with a 5% discount to increase Average Order Value (AOV).
-   *  Optimize average discount rates (currently at 4.88%) to increase overall margins.`;
+   *  Consider bundling ${topProdName} + ${secondProdName} as a combo with a 5% discount to increase Average Order Value (AOV).
+   *  Optimize average discount rates to increase overall margins.`;
   }
-  else if (/\b(stock|inventory|cheese|slice|sku|low|alert|reorder)\b/i.test(query)) {
+  else if (/\b(stock|inventory|cheese|slice|sku|low|alert|reorder|pizza\s+base)\b/i.test(query)) {
     replyText = `### Inventory & Supply Chain Alert
 *  **Low Stock Alert**: ${alertText}
-*  **Action Item**: Reorder Cheese Slice immediately (lead time is 3 days) to avoid stockouts and capture the full Burger sales volume in your July peaks.
+*  **Action Item**: Reorder ${lowStockItem?.sku || 'Pizza Base'} immediately (lead time is ${lowStockItem?.leadTime || 2} days) to avoid stockouts.
 *  All other menu ingredient stocks are healthy.`;
   }
   else if (/\b(sales|forecast|project|future|july)\b/i.test(query)) {
     replyText = `### Sales Projections (July 2026)
 *  **14-Day Projections**: The machine learning model expects sales to total **₹2.0L** (₹203.6K) for the next 14 days of July.
 *  **Weekly Pattern**: Projections show high demand peaks (up to ₹19.5K/day) on weekends (Friday, Saturday, Sunday) and dips (down to ₹11.0K/day) on weekdays.
-*  **Margin Outlook**: Projected sales significantly exceed your expenses (₹55.0K), keeping your cashflow health **Healthy**!`;
+*  **Margin Outlook**: Projected sales significantly exceed your expenses (${formattedExp}), keeping your cashflow health **Healthy**!`;
   }
   else {
     replyText = `### AI Co-pilot Consulting Response
