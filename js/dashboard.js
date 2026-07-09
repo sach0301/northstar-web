@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const text = desc.toLowerCase();
       
       // 1. Salaries reduction check
-      if (text.includes('salaries') || text.includes('salary')) {
+      if (/\bsalar(y|ies)\b/i.test(desc)) {
         const matches = desc.match(/from\s+₹?([0-9,.]+)\s+to\s+₹?([0-9,.]+)/i);
         if (matches && matches.length >= 3) {
           const fromVal = parseFloat(matches[1].replace(/,/g, ''));
@@ -508,8 +508,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return '₹3,000 savings identified';
       }
 
-      // 2. Rent renegotiation check
-      if (text.includes('rent')) {
+      // 2. Rent renegotiation check (using boundary to avoid matching "current")
+      if (/\brent\b/i.test(desc)) {
         const amtMatch = desc.match(/rent\s+expense\s+of\s+₹?([0-9,.]+)/i);
         const pctMatch = desc.match(/([0-9]+)%\s+reduction/i);
         if (amtMatch && pctMatch) {
@@ -520,16 +520,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return `₹${savings.toLocaleString('en-IN')} rent savings`;
           }
         }
-        return '₹1,000 savings identified';
+        return '₹1,000 rent savings';
       }
 
       // 3. Discount optimization check
-      if (text.includes('discount')) {
+      if (/\bdiscount(s)?\b/i.test(desc)) {
         return '₹4,000 profit optimization';
       }
 
       // 4. Pizza and Burger revenue increase check
-      if (text.includes('pizza') || text.includes('burger')) {
+      if (/\b(pizza|burger)(s)?\b/i.test(desc)) {
         const matches = desc.match(/contributing\s+₹?([0-9,.]+)/gi);
         if (matches) {
           let sum = 0;
@@ -546,32 +546,32 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // 5. Dynamic pricing peak check
-      if (text.includes('dynamic pricing') || text.includes('peak')) {
+      if (/\b(dynamic\s+pricing|peak)\b/i.test(desc)) {
         return '+₹10,500 peak day revenue';
       }
 
       // 6. Online ordering check
-      if (text.includes('online order') || text.includes('online ordering')) {
+      if (/\bonline\s+order(ing|s)?\b/i.test(desc)) {
         return '+₹15,000 online order growth';
       }
 
       // 7. Cheese slice stockout check
-      if (text.includes('cheese slice') || text.includes('inventory')) {
+      if (/\b(cheese\s+slice|inventory)\b/i.test(desc)) {
         return '₹2,500 inventory savings';
       }
 
       // 8. Just-in-time check
-      if (text.includes('just-in-time') || text.includes('overstocking')) {
+      if (/\b(just-in-time|overstocking)\b/i.test(desc)) {
         return '₹4,500 storage cost reduction';
       }
 
       // 9. Employee training check
-      if (text.includes('employee training') || text.includes('process optimization')) {
+      if (/\b(training|process\s+optimization)\b/i.test(desc)) {
         return '+₹6,200 efficiency gains';
       }
 
       // 10. Expense burn review
-      if (text.includes('expense burn') || text.includes('variable costs')) {
+      if (/\b(burn|variable\s+cost(s)?)\b/i.test(desc)) {
         const match = desc.match(/ratio\s+of\s+([0-9.]+)%/i);
         if (match) {
           const pct = parseFloat(match[1]);
