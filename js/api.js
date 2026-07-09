@@ -57,6 +57,20 @@ const MOCK_ANALYSIS_RESPONSE = {
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+function formatCurrency(val) {
+  const isNegative = val < 0;
+  const absVal = Math.abs(val);
+  let formatted = '';
+  if (absVal >= 100000) {
+    formatted = `₹${(absVal / 100000).toFixed(1)}L`;
+  } else if (absVal >= 1000) {
+    formatted = `₹${(absVal / 1000).toFixed(1)}K`;
+  } else {
+    formatted = `₹${absVal.toFixed(0)}`;
+  }
+  return isNegative ? `-${formatted}` : formatted;
+}
+
 export const API = {
   async runFullAnalysis(file, tuningMethod = 'fast') {
     if (CONFIG.apiBaseUrl === 'mock') {
@@ -163,40 +177,57 @@ function generateLocalMockReply(question, isFallback = false) {
   
   const prefix = isFallback ? `**[System Note: Co-pilot running in simulated mode during server spin up]**\n\n` : '';
 
+  // Extract active metrics dynamically from STATE
+  const rev = STATE.dashboardData?.raw_revenue || 58205;
+  const exp = STATE.dashboardData?.raw_expenses || 270000;
+  const profit = rev - exp;
+  const margin = rev > 0 ? ((profit / rev) * 100).toFixed(1) : '-371.6';
+  
+  const formattedRev = formatCurrency(rev);
+  const formattedExp = formatCurrency(exp);
+  const formattedProfit = formatCurrency(profit);
+
+  // Extract active low stock items dynamically
+  const invItems = STATE.dashboardData?.inventory_status || [];
+  const lowStockItem = invItems.find(item => item.currentStock < item.reorderLevel);
+  const alertText = lowStockItem 
+    ? `${lowStockItem.sku} is currently at ${lowStockItem.currentStock} units (below the reorder level of ${lowStockItem.reorderLevel} units).`
+    : `All inventory items are currently healthy and fully stocked.`;
+
   if (query.includes('strength') || query.includes('positive') || query.includes('good')) {
     replyText = `### Your Business Strengths
 Based on your uploaded logs, here are the key strengths:
-*  **Strong Profit Margin (26.9%)**: Your business generated ₹1.1L net profit on ₹4.0L gross revenue in June.
-*  **Top SKU Domination**: Dosa Batter is your primary driver, contributing over 75% of your total product sales.
-*  **Weekend Traffic**: Weekends account for 33.0% of your weekly traffic, indicating strong customer peak slots.`;
+*  **High Sales Concentration**: Your top products drive substantial demand, with Burger alone bringing in over 85.9% of your total logged revenue.
+*  **Strong Volume Days**: Your transactions peaked on mid-week Wednesdays, highlighting opportunities for targeted promotions.
+*  **Product Catalog diversity**: You have successfully processed sales across multiple items like Dosa, Pizza, and Idli.`;
   } 
-  else if (query.includes('cashflow') || query.includes('expense') || query.includes('cost') || query.includes('salaries')) {
+  else if (query.includes('cashflow') || query.includes('expense') || query.includes('cost') || query.includes('reduce') || query.includes('sustain')) {
     replyText = `### Cost & Cashflow Analysis
-Analyzing your expenses breakdown (totaling ₹2.9L):
-*  **High Fixed Costs**: Salaries (₹1.2L) and Rent (₹45K) constitute **56.8%** of your total monthly burn.
-*  **Inventory Purchasing**: Materials procurement represents ₹85K. 
-*  **Recommendation**: Negotiate material prices or optimize kitchen staff shift timings during off-peak slots (2:00 PM - 5:00 PM) to reduce variable wages.`;
+Reviewing your exact expenses breakdown (totaling **${formattedExp}**):
+*  **High Overhead Burn**: Your rent and staff salaries represent a large portion of your monthly expenses.
+*  **Net Cash Position**: You are running a net cash position of **${formattedProfit}** (Margin: **${margin}%**).
+*  **Action Item**: Consider renegotiating utility agreements and reducing shifts during off-peak times to bring down the monthly burn.`;
   }
   else if (query.includes('close') || query.includes('shut') || query.includes('fail')) {
     replyText = `### Strategic Business Recommendation
-**No, you should not shut down the business.**
-*  Your current Net Profit margin is **26.9%** (generating ₹1.1L positive cashflow).
-*  A business with a margin above 20% is highly viable. 
-*  Instead of shutting down, implement our priority action plan: reduce utility overheads, adjust kitchen shift timings, and negotiate raw material costs with Fresh Bakers Pvt Ltd.`;
+**Recommendation: Do not close the business yet.**
+*  While you have a monthly burn of **${formattedExp}**, your product demand is strong, bringing in **${formattedRev}** in sales.
+*  The negative margin of **${margin}%** is due to a temporary cash mismatch.
+*  Focus on decreasing variable material costs and raising prices slightly on Dosa, Pizza, and Idli before deciding to shut down operations.`;
   }
   else if (query.includes('sales') || query.includes('forecast') || query.includes('project')) {
-    replyText = `### Sales Projections (July 2026)
-*  **Projections**: The model expects sales to total **₹3.7L** for the next 30 days.
-*  **Timeframe**: July 1st to July 30th, 2026.
-*  **Action Item**: Keep inventory safety stock buffers set to 3 days to capture the projected growth without inventory decay.`;
+    replyText = `### Sales Projections
+*  **Projections**: The model expects sales to total **₹67.9K** for the next 14 days.
+*  **Action Item**: Reorder understocked ingredients to capture this volume successfully and prevent lost sales.`;
   }
   else {
     replyText = `### AI Co-pilot Consulting Response
 Reviewing your query: *"${question}"*
-*  **Revenues**: ₹4.0L gross revenue.
-*  **Expenses**: ₹2.9L fixed and variable costs.
-*  **Inventory Alert**: Sambhar Powder is currently at 30 units (below the reorder level of 40 units). 
-*  *Ask me more about menu pricing, labor optimization, or stock reordering!*`;
+*  **Logged Revenues**: ${formattedRev}
+*  **Logged Expenses**: ${formattedExp}
+*  **Cash Position**: ${formattedProfit} (Margin: ${margin}%)
+*  **Inventory Alert**: ${alertText}
+*  *Ask me more about menu pricing, overhead reductions, or low-stock alerts!*`;
   }
 
   const userMsg = { role: 'user', content: question };
