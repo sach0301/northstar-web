@@ -240,10 +240,18 @@ function generateLocalMockReply(question, isFallback = false) {
 
   if (/\b(shut|shuy|shyt|close|stop|exit|quit|abandon|fail)\b/i.test(query) || query.includes('shuy') || query.includes('shyt')) {
     replyText = `### Strategic Business Recommendation
-**Recommendation: Review your overhead cost structure.**
-*  **Revenues vs Expenses**: Your business has logged **${formattedRev}** in sales against **${formattedExp}** in expenses, yielding a net profit of **${formattedProfit}**.
-*  **Demand Growth**: Product demand is strong, especially for ${topProdName} (${topProdRev}) and ${secondProdName} (${secondProdRev}).
-*  **Opportunity**: Focus on reducing fixed overheads (Salaries and Rent) to return to profitability.`;
+**Answer: Do not shut down yet, but you must reduce expenses immediately.**
+
+Your business is currently losing money because your expenses (**${formattedExp}**) are much higher than your sales (**${formattedRev}**), resulting in a net loss of **${formattedProfit}**. 
+
+However, your customer demand is strong:
+*  **${topProdName}** alone generated **${topProdRev}** in sales.
+*  **${secondProdName}** generated **${secondProdRev}**.
+
+**Next Steps for the Owner:**
+1.  **Reduce Salaries:** Your payroll is too high relative to sales. Optimize your shift scheduling.
+2.  **Renegotiate Rent:** Speak to your landlord about lowering the rent or look for a lower-cost location.
+3.  **Halt Operations Option:** If you cannot bring down these fixed overheads within the next 30 days, then halting operations to stop further losses would be the safest decision.`;
   }
   else if (/\b(current\s+sales|total\s+sales|historical\s+sales|actual\s+sales|sales\s+as\s+of|sales\s+so\s+far)\b/i.test(query)) {
     replyText = `### Current Sales & Orders Summary
@@ -254,13 +262,15 @@ Based on your uploaded spreadsheet data:
 *  **Top Performer**: ${topProdName} generated the highest revenue at **${topProdRev}**.`;
   }
   else if (/\b(status|look|perform|overall|health|summary|business|how\s+is)\b/i.test(query)) {
-    replyText = `### Business Health Overview
-Based on your uploaded rows, here is how your business is currently looking:
-*  **Total Revenue**: **${formattedRev}** (sales volume across ${STATE.dashboardData?.raw_orders || 785} orders).
-*  **Total Expenses**: **${formattedExp}** (primarily Rent and Salaries).
-*  **Net Profit**: **${formattedProfit}** (Operating margin is **${margin}%**).
-*  **Inventory Alert**: ${alertText}
-Overall, focus on reducing overheads to push the margin to positive territory!`;
+    replyText = `### Business Performance Summary
+**Current Status: Running at a loss due to high overhead expenses.**
+
+*  **Sales Revenue**: **${formattedRev}** (sales volume across ${STATE.dashboardData?.raw_orders || 785} orders). Customers are active and buying!
+*  **Total Expenses**: **${formattedExp}** (your bills, mainly Rent and Salaries).
+*  **Net Profit**: **${formattedProfit}** (you are currently losing money).
+*  **Stock Status**: ${alertText}
+
+**Summary**: Your sales volume is solid, but you are spending too much on operating costs. Focus on cutting expenses to make the business profitable.`;
   }
   else if (/\b(strength|good|positive|advantage)\b/i.test(query)) {
     replyText = `### Your Business Strengths
@@ -269,45 +279,46 @@ Based on your uploaded logs, here are your key operational advantages:
 *  **Order Frequency**: You processed a total of **${STATE.dashboardData?.raw_orders || 785} orders** indicating strong, active customer traffic.`;
   } 
   else if (/\b(expense|salary|salaries|rent|cost|spend|reduce|burn)\b/i.test(query)) {
-    replyText = `### Cost & Overhead Analysis
-Reviewing your monthly expenses breakdown (totaling **${formattedExp}**):
-*  **Fixed Overheads**: Rent (${formattedRent}) and Salaries (${formattedSalaries}) represent the largest portion of your monthly expense baseline.
-*  **Dynamic Cost Action**: 
-   *  Reduce Salaries by 10% (saving ${formatCurrency(salariesAmt * 0.1)}) by optimizing staff shifts.
-   *  Renegotiate Rent by 5% (saving ${formatCurrency(rentAmt * 0.05)}) to decrease monthly burn.`;
+    replyText = `### Expense Breakdown & Action Plan
+**Analysis: Rent and Salaries are too high for your current sales volume.**
+
+*  **Total Monthly Cost**: **${formattedExp}**
+*  **Biggest Costs**: Rent (**${formattedRent}**) and Salaries (**${formattedSalaries}**) are draining your revenues.
+*  **Immediate Savings Plan**:
+   *  **Cut staff hours** during quiet times to save 10% on salaries (saves **${formatCurrency(salariesAmt * 0.1)}**).
+   *  **Renegotiate rent** with your landlord to save 5% (saves **${formatCurrency(rentAmt * 0.05)}**).`;
   }
   else if (/\b(price|pricing|menu|chicken|hummus|pasta|burger|pizza|dosa|idli|combo)\b/i.test(query)) {
-    replyText = `### Menu & Pricing Insights
-Analyzing your top-selling products:
-*  **${topProdName}**: Generated **${topProdRev}** (contributing to total revenue).
-*  **${secondProdName}**: Generated **${secondProdRev}** (contributing to total revenue).
-*  **Strategic Price Action**:
-   *  Consider bundling ${topProdName} + ${secondProdName} as a combo with a 5% discount to increase Average Order Value (AOV).
-   *  Optimize average discount rates to increase overall margins.`;
+    replyText = `### Menu & Sales Insights
+**Analysis: Your menu items are selling well, but you can increase profits with combos.**
+
+*  **Top Seller**: **${topProdName}** generated **${topProdRev}** in sales.
+*  **Second Seller**: **${secondProdName}** generated **${secondProdRev}**.
+*  **Recommendation**: Combine ${topProdName} and ${secondProdName} as a combo deal with a small discount. This encourages customers to spend more per order.`;
   }
   else if (/\b(stock|inventory|cheese|slice|sku|low|alert|reorder|pizza\s+base)\b/i.test(query)) {
-    replyText = `### Inventory & Supply Chain Alert
-*  **Low Stock Alert**: ${alertText}
-*  **Action Item**: Reorder ${lowStockItem?.sku || 'Pizza Base'} immediately (lead time is ${lowStockItem?.leadTime || 2} days) to avoid stockouts.
-*  All other menu ingredient stocks are healthy.`;
+    replyText = `### Inventory & Stock Alert
+*  **Urgent Alert**: ${alertText}
+*  **What to do**: Order more **${lowStockItem?.sku || 'Pizza Base'}** immediately from your supplier (lead time is ${lowStockItem?.leadTime || 2} days) so you do not run out of stock and miss out on customer orders.
+*  All other inventory items are in stock.`;
   }
   else if (/\b(sales|forecast|project|future|july)\b/i.test(query)) {
     const isHealthy = 203600 > exp;
     const outlookText = isHealthy 
-      ? `Projected sales significantly exceed your monthly expenses (${formattedExp}), keeping your cashflow health **Healthy**!`
-      : `Projected sales are lower than your monthly expenses (${formattedExp}), indicating a **Critical (Net Outflow)** cashflow outlook for this period.`;
+      ? `Your projected sales are higher than your monthly bills, so your cashflow will be **Healthy**.`
+      : `Your projected sales are lower than your monthly bills, so you will face a **Cash Shortage** unless you cut costs.`;
       
-    replyText = `### Sales Projections (July 2026)
-*  **14-Day Projections**: The machine learning model expects sales to total **₹2.0L** (₹203.6K) for the next 14 days of July.
-*  **Weekly Pattern**: Projections show high demand peaks (up to ₹19.5K/day) on weekends (Friday, Saturday, Sunday) and dips (down to ₹11.0K/day) on weekdays.
-*  **Margin Outlook**: ${outlookText}`;
+    replyText = `### Future Sales Forecast (July 2026)
+*  **Next 14 Days Forecast**: Sales are expected to reach **₹2.0L** (₹203.6K).
+*  **Weekly Pattern**: Weekend sales (Friday to Sunday) are much busier than weekdays.
+*  **Cashflow Outlook**: ${outlookText}`;
   }
   else {
-    replyText = `### AI Co-pilot Consulting Response
+    replyText = `### AI Co-pilot Response
 Reviewing your query: *"${question}"*
 *  **Logged Revenues**: ${formattedRev}
 *  **Logged Expenses**: ${formattedExp}
-*  **Cash Position**: ${formattedProfit} (Margin: ${margin}%)
+*  **Cash Position**: ${formattedProfit}
 *  **Inventory Alert**: ${alertText}
 *  *Ask me more about menu pricing, overhead reductions, or low-stock alerts!*`;
   }
