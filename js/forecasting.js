@@ -100,9 +100,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const accuracy = (100 - mapeVal).toFixed(1);
     const accuracyTextEl = document.getElementById('model-accuracy-text');
     if (accuracyTextEl) {
-      let rating = 'Highly Reliable (Excellent)';
-      if (accuracy < 75) rating = 'Moderate Reliability (Fair)';
-      else if (accuracy < 90) rating = 'Reliable (Good)';
+      let rating = 'Highly Reliable - Excellent';
+      if (accuracy < 75) rating = 'Moderate Reliability - Fair';
+      else if (accuracy < 90) rating = 'Reliable - Good';
       accuracyTextEl.textContent = `${accuracy}% (${rating})`;
     }
 
