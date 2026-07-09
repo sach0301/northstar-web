@@ -88,13 +88,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       cashflowEl.style.color = 'var(--success-color)';
     }
 
-    document.getElementById('forecast-model').textContent = data.best_model;
+    const modelEl = document.getElementById('forecast-model');
+    if (modelEl) modelEl.textContent = data.best_model;
 
     // Populate Evaluation Metrics
-    document.getElementById('metric-mae').textContent = data.metrics.MAE;
-    document.getElementById('metric-rmse').textContent = data.metrics.RMSE;
-    document.getElementById('metric-mape').textContent = data.metrics.MAPE;
-    document.getElementById('metric-wape').textContent = data.metrics.WAPE;
+    const maeEl = document.getElementById('metric-mae');
+    if (maeEl) maeEl.textContent = data.metrics.MAE;
+    const rmseEl = document.getElementById('metric-rmse');
+    if (rmseEl) rmseEl.textContent = data.metrics.RMSE;
+    const mapeEl = document.getElementById('metric-mape');
+    if (mapeEl) mapeEl.textContent = data.metrics.MAPE;
+    const wapeEl = document.getElementById('metric-wape');
+    if (wapeEl) wapeEl.textContent = data.metrics.WAPE;
 
     // Calculate dynamic accuracy percentage based on MAPE
     const mapeVal = parseFloat(data.metrics.MAPE) || 6.4;
