@@ -205,6 +205,46 @@ document.addEventListener('DOMContentLoaded', async () => {
       actionsContainer.appendChild(card);
     });
 
+    // Dynamically populate accordions to match uploaded workbook
+    if (STATE.dashboardData) {
+      // 1. Pricing Optimization
+      const topProduct = STATE.dashboardData.product_performance?.[0]?.name || 'Chicken';
+      const topRevenueVal = STATE.dashboardData.product_performance?.[0]?.revenue || 48000;
+      const topRevenue = formatCurrency(topRevenueVal);
+      
+      const prod1 = STATE.dashboardData.product_performance?.[0]?.name || 'Chicken';
+      const prod2 = STATE.dashboardData.product_performance?.[1]?.name || 'Hummus';
+      
+      const pricing1 = document.getElementById('accord-pricing-1');
+      if (pricing1) {
+        pricing1.textContent = `Increase ${topProduct} prices by 5% to 8% to capture gross margins. Since ${topProduct} generated ${topRevenue} in revenue, demand remains highly inelastic.`;
+      }
+      const pricing2 = document.getElementById('accord-pricing-2');
+      if (pricing2) {
+        pricing2.textContent = `Bundle ${prod1} + ${prod2} together as a breakfast combo with a 5% discount to increase Average Order Value (AOV).`;
+      }
+
+      // 2. Inventory & Supply Chain
+      let lowStockItem = 'Pizza Base';
+      let lowStockLead = 2;
+      const lowStockAlerts = STATE.dashboardData.inventory_status?.filter(item => item.currentStock < item.reorderLevel) || [];
+      if (lowStockAlerts.length > 0) {
+        lowStockItem = lowStockAlerts[0].sku;
+        lowStockLead = lowStockAlerts[0].leadTime;
+      }
+      
+      const firstSupplier = STATE.dashboardData.inventory_status?.[0]?.supplier || 'Fresh Bakers Pvt Ltd';
+      
+      const inv1 = document.getElementById('accord-inventory-1');
+      if (inv1) {
+        inv1.textContent = `Create a backup sourcing contract for batter items. Your high dependency on '${firstSupplier}' is a minor operational risk.`;
+      }
+      const inv2 = document.getElementById('accord-inventory-2');
+      if (inv2) {
+        inv2.textContent = `Reduce lead times by keeping safety stock buffer levels set to ${lowStockLead + 1} days for ${lowStockItem}.`;
+      }
+    }
+
     initAccordions();
   }
 
