@@ -1,14 +1,15 @@
 // CENTRAL CONFIGURATION FOR NORTHSTAR APIS
 export const CONFIG = {
-  // Set apiBaseUrl to 'mock' to run the simulated offline dashboard in the browser
-  // For live backend integration, set to your API URL: e.g. 'https://api.northstar.com'
-  apiBaseUrl: 'mock',
+  // Set to 'mock' to run the offline dashboard preview in the browser
+  // For live backend integration, set to your API URL:
+  apiBaseUrl: 'https://northstar-business-consultant-api.onrender.com',
+  chatBaseUrl: 'https://northstar-ai-chat-api.onrender.com',
+  
+  // Graceful fallback to mock data if the Render server experiences cold-start timeouts
+  useMockFallback: true,
   
   endpoints: {
-    upload: '/upload',
-    dashboard: '/dashboard',
-    forecast: '/forecast',
-    recommendations: '/recommendations',
-    chat: '/chat'
+    analyze: '/analyze-business',
+    chat: '/Chat'
   }
 };

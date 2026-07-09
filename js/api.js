@@ -1,212 +1,180 @@
 import { CONFIG } from './config.js';
 import { STATE } from './state.js';
 
-// MOCK DATA SEEDS
-const MOCK_DASHBOARD = {
-  raw_revenue: 33500,
-  raw_expenses: 159000,
-  raw_orders: 430,
-  top_product: 'Dosa',
-  is_inventory_uploaded: true,
-  inventory_alerts: 0,
-  inventory_health: 100.0,
-  critical_item: 'None',
-  daily_sales: [
-    { date: '01/06', revenue: 54999, orders: 179 },
-    { date: '02/06', revenue: 49999, orders: 150 },
-    { date: '03/06', revenue: 52000, orders: 165 },
-    { date: '04/06', revenue: 45000, orders: 140 },
-    { date: '05/06', revenue: 48000, orders: 145 },
-    { date: '06/06', revenue: 55000, orders: 180 },
-    { date: '07/06', revenue: 58000, orders: 195 }
-  ],
-  product_performance: [
-    { name: 'Dosa', units: 123, revenue: 10000 },
-    { name: 'Idli', units: 150, revenue: 9500 },
-    { name: 'Raagi', units: 111, revenue: 14000 }
-  ],
-  insights: [
-    { type: 'success', title: 'Top Performer', desc: 'Raagi demand is rising rapidly — consider restocking raw materials.' },
-    { type: 'warning', title: 'Margin Alert', desc: 'Operating expenses are high (₹1.6L) relative to revenue. Review payroll and utilities.' },
-    { type: 'info', title: 'Inventory Stable', desc: 'All 2 main ingredients are fully stocked above reorder levels.' }
-  ]
-};
-
-const MOCK_FORECAST = {
-  best_model: 'Prophet (Time Series)',
-  metrics: {
-    MAE: '124.50',
-    RMSE: '182.20',
-    MAPE: '4.8%',
-    WAPE: '5.1%'
+// MOCK API FALLBACK SEEDS (Used for local offline testing or cold-start fallback)
+const MOCK_ANALYSIS_RESPONSE = {
+  "Sales Analysis": {
+    "selected_model": "Prophet (Additive Regression)",
+    "evaluation_metrics": { "MAE": "124.50", "RMSE": "182.20", "MAPE": "4.8%", "WAPE": "5.1%" },
+    "forecast": [
+      { "Date": "Jul 1", "prediction": 33800, "lower_bound": 32000, "upper_bound": 35000 },
+      { "Date": "Jul 2", "prediction": 34200, "lower_bound": 32200, "upper_bound": 36200 },
+      { "Date": "Jul 3", "prediction": 35000, "lower_bound": 33000, "upper_bound": 37000 },
+      { "Date": "Jul 4", "prediction": 35800, "lower_bound": 33500, "upper_bound": 38000 },
+      { "Date": "Jul 5", "prediction": 36400, "lower_bound": 34000, "upper_bound": 38800 },
+      { "Date": "Jul 6", "prediction": 37200, "lower_bound": 34800, "upper_bound": 39600 },
+      { "Date": "Jul 7", "prediction": 37800, "lower_bound": 35000, "upper_bound": 40500 }
+    ]
   },
-  projected_sales: '₹37.8K',
-  sales_trend: '+12.9% vs last period',
-  projected_expenses: '₹1.8L',
-  expense_trend: '+1.2% vs last period — stable',
-  cashflow_status: 'Critical — net negative',
-  stock_status: 'All stock healthy',
-  forecast_chart_data: [
-    { date: 'Jul 1', revenue: 33800, confidence_low: 32000, confidence_high: 35000 },
-    { date: 'Jul 2', revenue: 34200, confidence_low: 32200, confidence_high: 36200 },
-    { date: 'Jul 3', revenue: 35000, confidence_low: 33000, confidence_high: 37000 },
-    { date: 'Jul 4', revenue: 35800, confidence_low: 33500, confidence_high: 38000 },
-    { date: 'Jul 5', revenue: 36400, confidence_low: 34000, confidence_high: 38800 },
-    { date: 'Jul 6', revenue: 37200, confidence_low: 34800, confidence_high: 39600 },
-    { date: 'Jul 7', revenue: 37800, confidence_low: 35000, confidence_high: 40500 }
+  "Product Analysis": {
+    "Forecast_14_Days": {
+      "Dosa": [
+        { "Date": "Jul 1", "prediction": 125, "lower_bound": 110, "upper_bound": 140 },
+        { "Date": "Jul 2", "prediction": 130, "lower_bound": 115, "upper_bound": 145 }
+      ],
+      "Idli": [
+        { "Date": "Jul 1", "prediction": 155, "lower_bound": 140, "upper_bound": 170 },
+        { "Date": "Jul 2", "prediction": 160, "lower_bound": 145, "upper_bound": 175 }
+      ]
+    }
+  },
+  "Expense Analysis": {
+    "fixed_costs": 165000,
+    "variable_costs": 105000,
+    "ratio": "61% Fixed / 39% Variable"
+  },
+  "Inventory Analysis": {
+    "sku_details": [
+      { "sku": "Dosa Batter", "stock_coverage_days": 4, "recommended_reorder": 120, "urgency": "HIGH" },
+      { "sku": "Idli Batter", "stock_coverage_days": 8, "recommended_reorder": 80, "urgency": "MEDIUM" },
+      { "sku": "Sambhar Pow", "stock_coverage_days": 22, "recommended_reorder": 0, "urgency": "LOW" }
+    ]
+  },
+  "Anomalies": [
+    { "type": "Drop", "date": "04/06/2026", "change": "-18%", "reason": "Heavy thunderstorm local area lockdown" }
   ],
-  insights: [
-    { title: 'Sales Trend', desc: 'MoM revenue is projected to rise 12.9% in July, driven by weekend breakfast slots.' },
-    { title: 'Cashflow Warning', desc: 'Due to fixed operational expenses, cash reserves will drop. Recommend optimizing staff hours.' }
-  ]
+  "Business Health": {
+    "score": 88
+  },
+  "Business Insights": {
+    "Top_10_AI_Recommendations": [
+      { "title": "Slightly Increase Raagi Menu Pricing", "desc": "Raagi demand shows price inelasticity. Raise pricing by 5-8% to capture premium margins." },
+      { "title": "Optimize Cooking Staff Shift Schedules", "desc": "Restrict second helper hours strictly to peak breakfast (7:30 AM) and dinner slots." },
+      { "title": "Create Combo Packs for Afternoon Slots", "desc": "Offer discounted Dosa + Drink meals to lift stagnant afternoon revenues." }
+    ]
+  }
 };
 
-const MOCK_RECOMMENDATIONS = {
-  summary: 'Your business is demonstrating strong product-market fit with high-volume items like Dosa and Raagi. However, fixed operational costs (primarily salaries and rent totaling ₹1.6L) are creating short-term cash flow constraints. Focused marketing efforts and inventory cost reduction are highly recommended.',
-  strengths: ['Strong demand for Raagi (₹14K generated in 1 day)', 'Excellent inventory health (100% stocked, 0 warnings)', 'High average order value on breakfast items'],
-  weaknesses: ['Negative net cashflow (-₹1.3L) due to operating costs', 'High utility expenses relative to restaurant size', 'Underperforming afternoon lunch menu slots'],
-  opportunities: ['Increase Raagi menu price slightly due to inelastic demand', 'Introduce bulk pre-purchase coupons for regular walk-in customers', 'Promote delivery slots on Zomato during off-peak hours'],
-  risks: ['High supplier dependence for Dosa/Idli batter (Fresh Bakers Pvt Ltd)', 'Sudden logistics price hikes could affect delivery margin'],
-  actions: [
-    { title: 'Increase Raagi Inventory & Price', desc: 'Slightly adjust Raagi pricing to capture premium margin. Restock batter proactively.', impact: '+₹15,000 / month impact' },
-    { title: 'Optimize Staff Scheduling', desc: 'Adjust shift schedules for cook helpers to align strictly with peak walk-in breakfast hours.', impact: '₹7,000 savings identified' },
-    { title: 'Promote Raagi Combos', desc: 'Offer a discounted Dosa + Raagi combo during afternoon hours to increase order volume.', impact: '+₹10,000 revenue potential' }
-  ]
-};
-
-// HELPER FOR LATENCY SIMULATION
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const API = {
-  async uploadFile(file, onProgress) {
+  async runFullAnalysis(file, tuningMethod = 'fast') {
     if (CONFIG.apiBaseUrl === 'mock') {
-      // Simulate file upload progress
-      for (let p = 0; p <= 100; p += 20) {
-        if (onProgress) onProgress(p);
-        await delay(300);
-      }
-      STATE.isUploaded = true;
-      STATE.fileName = file.name;
-      STATE.saveToSession();
-      return { success: true, fileName: file.name };
+      await delay(2500); // Simulate ML modeling calculation latency
+      return MOCK_ANALYSIS_RESPONSE;
     }
 
-    // Live backend connection
     const formData = new FormData();
     formData.append('file', file);
-    
-    // Using XMLHttpRequest to support progress callbacks
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', `${CONFIG.apiBaseUrl}${CONFIG.endpoints.upload}`);
-      
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable && onProgress) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          onProgress(percent);
-        }
-      };
+    formData.append('tuning_method', tuningMethod);
 
-      xhr.onload = () => {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          const res = JSON.parse(xhr.responseText);
-          STATE.isUploaded = true;
-          STATE.fileName = file.name;
-          STATE.saveToSession();
-          resolve(res);
-        } else {
-          reject(new Error(`Upload failed: ${xhr.statusText}`));
-        }
-      };
+    try {
+      const response = await fetch(`${CONFIG.apiBaseUrl}${CONFIG.endpoints.analyze}`, {
+        method: 'POST',
+        body: formData
+      });
 
-      xhr.onerror = () => reject(new Error('Network error during file upload'));
-      xhr.send(formData);
-    });
-  },
-
-  async fetchDashboard() {
-    if (CONFIG.apiBaseUrl === 'mock') {
-      await delay(1200); // Simulate network latency
-      STATE.dashboardData = MOCK_DASHBOARD;
-      STATE.saveToSession();
-      return MOCK_DASHBOARD;
-    }
-
-    const response = await fetch(`${CONFIG.apiBaseUrl}${CONFIG.endpoints.dashboard}`);
-    if (!response.ok) throw new Error('Failed to retrieve dashboard data');
-    const data = await response.json();
-    STATE.dashboardData = data;
-    STATE.saveToSession();
-    return data;
-  },
-
-  async fetchForecast() {
-    if (CONFIG.apiBaseUrl === 'mock') {
-      await delay(2500); // ML forecasting simulations take longer
-      STATE.forecastData = MOCK_FORECAST;
-      STATE.saveToSession();
-      return MOCK_FORECAST;
-    }
-
-    const response = await fetch(`${CONFIG.apiBaseUrl}${CONFIG.endpoints.forecast}`);
-    if (!response.ok) throw new Error('Failed to compute sales forecasts');
-    const data = await response.json();
-    STATE.forecastData = data;
-    STATE.saveToSession();
-    return data;
-  },
-
-  async fetchRecommendations() {
-    if (CONFIG.apiBaseUrl === 'mock') {
-      await delay(1500); // LLM processing delay
-      STATE.recommendationsData = MOCK_RECOMMENDATIONS;
-      STATE.saveToSession();
-      return MOCK_RECOMMENDATIONS;
-    }
-
-    const response = await fetch(`${CONFIG.apiBaseUrl}${CONFIG.endpoints.recommendations}`);
-    if (!response.ok) throw new Error('Failed to generate business insights');
-    const data = await response.json();
-    STATE.recommendationsData = data;
-    STATE.saveToSession();
-    return data;
-  },
-
-  async sendChatMessage(message) {
-    if (CONFIG.apiBaseUrl === 'mock') {
-      await delay(1000); // AI assistant response lag
-      let reply = '';
-      const lowercaseMsg = message.toLowerCase();
-      
-      if (lowercaseMsg.includes('raagi')) {
-        reply = 'Raagi shows highly strong demand, bringing in **₹14,000** in daily revenue. We suggest bundling it as a premium morning combo or adjusting prices up by 5-8% to capture higher gross margins.';
-      } else if (lowercaseMsg.includes('expense') || lowercaseMsg.includes('cost')) {
-        reply = 'Your operational expenses for June 2026 are **₹1.6L** (salaries of ₹120k + rent of ₹25k). Because revenue was ₹33.5K, your net profit is **-₹1.3L**. Consider running cooks on a shift schedule restricted strictly to breakfast/dinner peaks.';
-      } else if (lowercaseMsg.includes('forecast') || lowercaseMsg.includes('july')) {
-        reply = 'The ML model predicts sales will hit **₹37.8K** in July (+12.9% growth) while expenses remain mostly flat at **₹1.8L**. This helps narrow the net loss slightly, but additional revenue streams are needed.';
-      } else {
-        reply = 'Welcome to Northstar AI! I see your current monthly revenue is **₹33.5K** and expenses are **₹1.6L**. How can I help you optimize your kitchen staff scheduling, pricing, or supply chains today?';
+      if (!response.ok) {
+        throw new Error(`Server returned code ${response.status}: ${response.statusText}`);
       }
 
-      const userMsg = { role: 'user', content: message };
-      const botMsg = { role: 'assistant', content: reply };
+      const resJson = await response.json();
+      return resJson;
+    } catch (err) {
+      console.warn('API error encountered. Checking mock fallback availability:', err);
+      if (CONFIG.useMockFallback) {
+        await delay(1500);
+        return MOCK_ANALYSIS_RESPONSE;
+      }
+      throw err;
+    }
+  },
+
+  async sendChatMessage(question) {
+    if (CONFIG.apiBaseUrl === 'mock') {
+      await delay(1200); // Simulate AI reply latency
+      let replyText = '';
+      const query = question.toLowerCase();
+      
+      if (query.includes('raagi') || query.includes('pricing')) {
+        replyText = "### Recommending Price Adjustments\n\nBased on your raw product logs, **Raagi** contribution is high. We recommend:\n1. **Increase price by 5-8%**: Captured revenue shows customers are price-insensitive to this item.\n2. **Promote Combo Deals**: Pair Raagi with Dosa to increase average order values during lunch hours.";
+      } else if (query.includes('expense') || query.includes('cost') || query.includes('staff')) {
+        replyText = "### Expense Optimization\n\nYour fixed expenses (Salaries ₹1.2L + Rent ₹45K) represent **61%** of your total monthly cash outflows. Action list:\n*  **Optimize Shift scheduling**: Limit helper staff during the quiet 2:00 PM to 5:00 PM window.\n*  **Direct Raw-material deals**: Bulk purchase ingredients directly from distributors to cut variable logistics costs.";
+      } else {
+        replyText = "### Welcome to your AI Business Assistant\n\nI have successfully audited your sales forecasting data. I can help you with:\n*  Analyzing daily/monthly cost anomalies\n*  Recommending optimal safety stock levels\n*  Providing menu pricing adjustments to raise net profits.";
+      }
+      
+      const userMsg = { role: 'user', content: question };
+      const botMsg = { role: 'assistant', content: replyText };
       STATE.chatHistory.push(userMsg, botMsg);
       STATE.saveToSession();
       return botMsg;
     }
 
-    const response = await fetch(`${CONFIG.apiBaseUrl}${CONFIG.endpoints.chat}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, history: STATE.chatHistory })
-    });
-    if (!response.ok) throw new Error('Failed to obtain chat response');
-    const data = await response.json();
-    
-    const userMsg = { role: 'user', content: message };
-    const botMsg = { role: 'assistant', content: data.reply };
-    STATE.chatHistory.push(userMsg, botMsg);
-    STATE.saveToSession();
-    return botMsg;
+    // Build the request payload
+    let requestBody = {};
+    if (!STATE.chatSessionId) {
+      // First message: build token-efficient business context summary
+      const contextSummary = {
+        total_revenue: STATE.dashboardData?.raw_revenue || 0,
+        total_expenses: STATE.dashboardData?.raw_expenses || 0,
+        total_orders: STATE.dashboardData?.raw_orders || 0,
+        top_selling_product: STATE.dashboardData?.top_product || 'N/A',
+        anomalies_found: STATE.analysisResult?.Anomalies || [],
+        business_health_score: STATE.analysisResult?.['Business Health']?.score || 85,
+        ai_top_actions: STATE.analysisResult?.['Business Insights']?.Top_10_AI_Recommendations || []
+      };
+
+      requestBody = {
+        business_context: contextSummary,
+        user_question: question
+      };
+    } else {
+      // Subsequent messages: maintain session ID
+      requestBody = {
+        session_id: STATE.chatSessionId,
+        user_question: question
+      };
+    }
+
+    try {
+      const response = await fetch(`${CONFIG.chatBaseUrl}${CONFIG.endpoints.chat}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Chat API error ${response.status}: ${response.statusText}`);
+      }
+
+      const resJson = await response.json();
+      
+      // Store session ID if returned
+      if (resJson.session_id) {
+        STATE.chatSessionId = resJson.session_id;
+      }
+
+      const userMsg = { role: 'user', content: question };
+      const botMsg = { role: 'assistant', content: resJson.answer || resJson.reply };
+      
+      STATE.chatHistory.push(userMsg, botMsg);
+      STATE.saveToSession();
+      
+      return botMsg;
+    } catch (err) {
+      console.warn('Chat API error encountered. Falling back to mock assistant:', err);
+      if (CONFIG.useMockFallback) {
+        await delay(1000);
+        const replyText = `### Assistant Reply\n\nYour Render AI Chat endpoint is currently offline or spinning up. Here is a mocked response based on your query:\n\n* **Query:** "${question}"\n* **Advice:** Review your fixed salary costs (₹1.2L) and optimize inventory purchase budgets for ingredients showing stock alerts. Try reducing off-peak shifting hours.`;
+        
+        const userMsg = { role: 'user', content: question };
+        const botMsg = { role: 'assistant', content: replyText };
+        STATE.chatHistory.push(userMsg, botMsg);
+        STATE.saveToSession();
+        return botMsg;
+      }
+      throw err;
+    }
   }
 };
