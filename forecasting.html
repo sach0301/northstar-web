@@ -141,29 +141,40 @@
     <section class="dashboard-meta-grid">
       <!-- Accuracy Metrics Card -->
       <div class="glass-card">
-        <h3>Model Evaluation Metrics</h3>
-        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 15px;">Statistical error markers comparing training sets.</p>
+        <h3>Model Reliability & Accuracy</h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px;">We test the AI's models against your historical data to evaluate prediction accuracy before publishing forecasts.</p>
         
-        <div class="model-eval-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 0;">
-          <div class="glass-card eval-card">
-            <span>MAE</span>
-            <div class="eval-value" id="metric-mae">0.0</div>
-            <p style="color:var(--text-muted); font-size: 0.75rem; margin-top:2px;">Mean Abs Error</p>
+        <!-- Human-Readable Model Confidence Card -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); padding: 14px 18px; border-radius: 8px;">
+          <div>
+            <span style="font-size: 0.72rem; color: var(--success-color); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; display:block; margin-bottom:2px;">AI Model Confidence</span>
+            <h4 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin:0;" id="model-accuracy-text">93.6% (Highly Reliable)</h4>
           </div>
-          <div class="glass-card eval-card">
-            <span>RMSE</span>
-            <div class="eval-value" id="metric-rmse">0.0</div>
-            <p style="color:var(--text-muted); font-size: 0.75rem; margin-top:2px;">Root Mean Sq Error</p>
+          <div style="font-size: 1.5rem; color: var(--success-color); display:flex; align-items:center;">
+            <i data-lucide="shield-check" style="width:24px; height:24px;"></i>
           </div>
-          <div class="glass-card eval-card" style="margin-top:20px;">
-            <span>MAPE</span>
-            <div class="eval-value" id="metric-mape">0.0</div>
-            <p style="color:var(--text-muted); font-size: 0.75rem; margin-top:2px;">Mean Abs % Error</p>
+        </div>
+
+        <div class="model-eval-grid" style="grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 0;">
+          <div class="glass-card eval-card" style="padding: 16px;">
+            <span style="font-weight:600; font-size:0.85rem; color:var(--text-secondary);">Daily Variance (MAE)</span>
+            <div class="eval-value" id="metric-mae" style="font-size:1.5rem; margin:6px 0 2px 0;">0.0</div>
+            <p style="color:var(--text-muted); font-size: 0.74rem; line-height:1.3;" id="mae-explanation">Average daily prediction variance.</p>
           </div>
-          <div class="glass-card eval-card" style="margin-top:20px;">
-            <span>WAPE</span>
-            <div class="eval-value" id="metric-wape">0.0</div>
-            <p style="color:var(--text-muted); font-size: 0.75rem; margin-top:2px;">Weighted Abs % Error</p>
+          <div class="glass-card eval-card" style="padding: 16px;">
+            <span style="font-weight:600; font-size:0.85rem; color:var(--text-secondary);">Outlier Penalty (RMSE)</span>
+            <div class="eval-value" id="metric-rmse" style="font-size:1.5rem; margin:6px 0 2px 0;">0.0</div>
+            <p style="color:var(--text-muted); font-size: 0.74rem; line-height:1.3;">Measures prediction stability against random spikes.</p>
+          </div>
+          <div class="glass-card eval-card" style="padding: 16px;">
+            <span style="font-weight:600; font-size:0.85rem; color:var(--text-secondary);">Margin of Error (MAPE)</span>
+            <div class="eval-value" id="metric-mape" style="font-size:1.5rem; margin:6px 0 2px 0;">0.0</div>
+            <p style="color:var(--text-muted); font-size: 0.74rem; line-height:1.3;">Average error percentage of daily projections.</p>
+          </div>
+          <div class="glass-card eval-card" style="padding: 16px;">
+            <span style="font-weight:600; font-size:0.85rem; color:var(--text-secondary);">Weighted Error (WAPE)</span>
+            <div class="eval-value" id="metric-wape" style="font-size:1.5rem; margin:6px 0 2px 0;">0.0</div>
+            <p style="color:var(--text-muted); font-size: 0.74rem; line-height:1.3;">Error rate balanced for high and low sales volumes.</p>
           </div>
         </div>
       </div>
