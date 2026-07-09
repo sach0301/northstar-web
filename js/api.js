@@ -292,10 +292,15 @@ Analyzing your top-selling products:
 *  All other menu ingredient stocks are healthy.`;
   }
   else if (/\b(sales|forecast|project|future|july)\b/i.test(query)) {
+    const isHealthy = 203600 > exp;
+    const outlookText = isHealthy 
+      ? `Projected sales significantly exceed your monthly expenses (${formattedExp}), keeping your cashflow health **Healthy**!`
+      : `Projected sales are lower than your monthly expenses (${formattedExp}), indicating a **Critical (Net Outflow)** cashflow outlook for this period.`;
+      
     replyText = `### Sales Projections (July 2026)
 *  **14-Day Projections**: The machine learning model expects sales to total **₹2.0L** (₹203.6K) for the next 14 days of July.
 *  **Weekly Pattern**: Projections show high demand peaks (up to ₹19.5K/day) on weekends (Friday, Saturday, Sunday) and dips (down to ₹11.0K/day) on weekdays.
-*  **Margin Outlook**: Projected sales significantly exceed your expenses (${formattedExp}), keeping your cashflow health **Healthy**!`;
+*  **Margin Outlook**: ${outlookText}`;
   }
   else {
     replyText = `### AI Co-pilot Consulting Response
