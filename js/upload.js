@@ -62,24 +62,23 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadStatusText.textContent = 'Reading spreadsheet columns...';
 
     try {
-      const base64File = await fileToBase64(file);
+      progressBarFill.style.width = '30%';
+      uploadPercentage.textContent = '30%';
+      uploadStatusText.textContent = 'Processing and aligning sheet headers...';
       
-      progressBarFill.style.width = '40%';
-      uploadPercentage.textContent = '40%';
-      uploadStatusText.textContent = 'Extracting Sales, Products, Expenses, and Inventory...';
+      // Parse, extract, and auto-align rows to backend format
+      const { rebuiltBase64, previewData } = await parseAndRealignExcelFile(file);
       
-      const previewData = await parseExcelFile(file);
-      
-      progressBarFill.style.width = '80%';
-      uploadPercentage.textContent = '80%';
-      uploadStatusText.textContent = 'Compiling initial preview metrics...';
+      progressBarFill.style.width = '75%';
+      uploadPercentage.textContent = '75%';
+      uploadStatusText.textContent = 'Saving healed workbook to workspace...';
       
       STATE.clearSession(); 
       STATE.isUploaded = true;
       STATE.fileName = file.name;
       
       try {
-        sessionStorage.setItem('northstar_file_base64', base64File);
+        sessionStorage.setItem('northstar_file_base64', rebuiltBase64);
       } catch (err) {
         console.warn('Storage limit: Failed to store file base64 in sessionStorage', err);
       }
@@ -89,9 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       progressBarFill.style.width = '100%';
       uploadPercentage.textContent = '100%';
-      uploadStatusText.textContent = 'Dashboard synced successfully!';
+      uploadStatusText.textContent = 'Data healed & synced successfully!';
 
-      showToast(`Successfully parsed and synced initial dashboard preview from ${file.name}!`, 'success');
+      showToast(`Successfully aligned and imported workbook from ${file.name}!`, 'success');
       
       setTimeout(() => {
         window.location.href = 'dashboard.html';
@@ -104,25 +103,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-    });
-  }
-
-  function parseExcelFile(file) {
+  function parseAndRealignExcelFile(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
           const data = new Uint8Array(e.target.result);
-          if (!window.Xcontent || !window.XLSX) {
-            // Fallback check
-          }
           const XLSX = window.XLSX;
+          if (!XLSX) {
+            throw new Error('SheetJS library is not loaded. Cannot parse Excel file.');
+          }
           const workbook = XLSX.read(data, {type: 'array'});
           
           const sheetNames = workbook.SheetNames;
@@ -239,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return !s.includes('example') && !s.includes('instruction') && !s.includes('enter') && !s.includes('how to') && !s.includes('reference') && !s.includes('requirement');
           };
 
-          // 1. Sales Data (Filters out placeholder date cells)
+          // 1. Extract Sales Data
           const salesData = [];
           for (let i = salesHeaderIdx + 1; i < salesRaw.length; i++) {
             const row = salesRaw[i];
@@ -258,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
 
-          // 2. Product Data
+          // 2. Extract Product Data
           const productData = [];
           for (let i = productHeaderIdx + 1; i < productRaw.length; i++) {
             const row = productRaw[i];
@@ -275,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
 
-          // 3. Expenses Data
+          // 3. Extract Expenses Data
           const expensesData = [];
           for (let i = expensesHeaderIdx + 1; i < expensesRaw.length; i++) {
             const row = expensesRaw[i];
@@ -283,8 +273,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const dateVal = row[expensesCols.date];
             const rentVal = row[expensesCols.rent];
             if (dateVal && isDateString(dateVal) && rentVal !== null && rentVal !== undefined && String(rentVal).trim() !== '') {
+              // Convert text month formats like "Jun 2026" to "2026-06-01" to prevent backend date parsing errors
+              let dateStr = String(dateVal).trim();
+              if (dateStr.match(/^[A-Za-z]{3}\s\d{4}$/)) {
+                const months = { jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06', jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12' };
+                const parts = dateStr.toLowerCase().split(' ');
+                dateStr = `${parts[1]}-${months[parts[0]]}-01`;
+              }
               expensesData.push({
-                month: String(dateVal).trim(),
+                month: dateStr,
                 rent: parseNum(row[expensesCols.rent]),
                 salaries: parseNum(row[expensesCols.salaries]),
                 utilities: parseNum(row[expensesCols.utilities]),
@@ -297,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
 
-          // 4. Inventory Data
+          // 4. Extract Inventory Data
           const inventoryData = [];
           for (let i = inventoryHeaderIdx + 1; i < inventoryRaw.length; i++) {
             const row = inventoryRaw[i];
@@ -318,8 +315,6 @@ document.addEventListener('DOMContentLoaded', () => {
           const totalRevenue = salesData.reduce((sum, d) => sum + d.revenue, 0);
           const totalOrders = salesData.reduce((sum, d) => sum + d.orders, 0);
           const totalDiscounts = salesData.reduce((sum, d) => sum + d.discount, 0);
-          const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-          const discountRate = totalRevenue > 0 ? (totalDiscounts / totalRevenue) * 100 : 0;
 
           // Group products
           const productStats = {};
@@ -374,7 +369,74 @@ document.addEventListener('DOMContentLoaded', () => {
             ]
           };
 
-          resolve(previewData);
+          // --- REBUILD WORKBOOK WITH PERFECT ALIGNMENT FOR BACKEND API ---
+          const rebuiltWorkbook = XLSX.utils.book_new();
+
+          // 1. Sales Data (Headers on Row 9, Data starts on Row 14)
+          const salesRows = [];
+          for (let i = 0; i < 8; i++) salesRows.push([]);
+          salesRows.push([
+            '', 'Date (DD/MM/YYYY)', 'Total Revenue (₹)', 'Total Orders (#)', 'Walk-In Customers', 'Online Orders', 'Discounts Given (₹)'
+          ]);
+          for (let i = 0; i < 4; i++) salesRows.push([]);
+          salesData.forEach(d => {
+            salesRows.push(['', d.date, d.revenue, d.orders, d.walkIn, d.online, d.discount]);
+          });
+          const salesWS = XLSX.utils.aoa_to_sheet(salesRows);
+          XLSX.utils.book_append_sheet(rebuiltWorkbook, salesWS, 'Sales Data');
+
+          // 2. Product Data (Headers on Row 9, Data starts on Row 14)
+          const productRows = [];
+          for (let i = 0; i < 8; i++) productRows.push([]);
+          productRows.push([
+            '', 'Date (DD/MM/YYYY)', 'Product Name (exact & consistent)', 'Units Sold (#)', 'Revenue (₹)'
+          ]);
+          for (let i = 0; i < 4; i++) productRows.push([]);
+          productData.forEach(p => {
+            productRows.push(['', p.date, p.name, p.units, p.revenue]);
+          });
+          const productWS = XLSX.utils.aoa_to_sheet(productRows);
+          XLSX.utils.book_append_sheet(rebuiltWorkbook, productWS, 'Product Data');
+
+          // 3. Expenses Data (Headers on Row 10, Data starts on Row 15)
+          const expensesRows = [];
+          for (let i = 0; i < 9; i++) expensesRows.push([]);
+          expensesRows.push([
+            '', 'Month & Year', 'Rent (₹)', 'Salaries (₹)', 'Utilities (₹)', 'Inventory Purchase (₹)', 'Marketing (₹)', 'Logistics (₹)', 'Loan EMI (₹)', 'Other (₹)'
+          ]);
+          for (let i = 0; i < 4; i++) expensesRows.push([]);
+          expensesData.forEach(e => {
+            expensesRows.push(['', e.month, e.rent, e.salaries, e.utilities, e.inventoryPurchase, e.marketing, e.logistics, e.loanEmi, e.other]);
+          });
+          const expensesWS = XLSX.utils.aoa_to_sheet(expensesRows);
+          XLSX.utils.book_append_sheet(rebuiltWorkbook, expensesWS, 'Expenses');
+
+          // 4. Inventory Data (Headers on Row 10, Data starts on Row 18)
+          const inventoryRows = [];
+          for (let i = 0; i < 9; i++) inventoryRows.push([]);
+          inventoryRows.push([
+            '', 'Product / Ingredient / SKU', 'Current Stock (units)', 'Reorder Level (units)', 'Lead Time (days)', 'Supplier Name (optional)'
+          ]);
+          for (let i = 0; i < 7; i++) inventoryRows.push([]);
+          inventoryData.forEach(inv => {
+            inventoryRows.push(['', inv.sku, inv.currentStock, inv.reorderLevel, inv.leadTime, inv.supplier]);
+          });
+          const inventoryWS = XLSX.utils.aoa_to_sheet(inventoryRows);
+          XLSX.utils.book_append_sheet(rebuiltWorkbook, inventoryWS, 'Inventory');
+
+          // Convert rebuilt workbook to base64
+          const wbout = XLSX.write(rebuiltWorkbook, { bookType: 'xlsx', type: 'array' });
+          const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          const base64Reader = new FileReader();
+          
+          base64Reader.onload = function(e) {
+            resolve({
+              rebuiltBase64: e.target.result,
+              previewData: previewData
+            });
+          };
+          base64Reader.readAsDataURL(blob);
+
         } catch (err) {
           reject(err);
         }
