@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const chatInputForm = document.getElementById('chat-input-form');
   const chatTextInput = document.getElementById('chat-text-input');
   const btnClearChat = document.getElementById('btn-clear-chat');
+  const sendButton = chatInputForm.querySelector('button[type="submit"]');
   const suggestionChips = document.querySelectorAll('.suggestion-chip');
 
   // Initialize Chat Flow
@@ -23,7 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle suggestion chips click
   suggestionChips.forEach(chip => {
     chip.addEventListener('click', () => {
-      sendMessage(chip.textContent);
+      if (!chatTextInput.disabled) {
+        sendMessage(chip.textContent);
+      }
     });
   });
 
@@ -33,10 +36,25 @@ document.addEventListener('DOMContentLoaded', () => {
     STATE.chatSessionId = null;
     STATE.saveToSession();
     
-    // Clear display, run initial context summarization again
+    // Clear display and re-initialize
     chatMessagesContainer.innerHTML = '';
     initializeChat();
   });
+
+  function setInputLoadingState(isLoading) {
+    if (isLoading) {
+      chatTextInput.disabled = true;
+      chatTextInput.placeholder = "Co-pilot is analyzing metrics...";
+      if (sendButton) sendButton.disabled = true;
+      suggestionChips.forEach(chip => chip.style.opacity = '0.5');
+    } else {
+      chatTextInput.disabled = false;
+      chatTextInput.placeholder = "Ask your business co-pilot...";
+      if (sendButton) sendButton.disabled = false;
+      suggestionChips.forEach(chip => chip.style.opacity = '1');
+      chatTextInput.focus();
+    }
+  }
 
   async function initializeChat() {
     // 1. Check if history exists
@@ -49,7 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Check if analysis data is present to run initial context sync
     if (STATE.analysisResult) {
-      // Append initial greeting
+      // Set input to loading state to block concurrent user inputs
+      setInputLoadingState(true);
+      
       appendMessage('assistant', "Analyzing your synced business metrics... I am initializing a strategic consultant session for you.");
       
       const typingIndicator = showTypingIndicator();
@@ -62,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (err) {
         typingIndicator.remove();
         appendMessage('assistant', `Failed to initialize AI consultant session: ${err.message}. Ask a free-form question below to retry.`);
+      } finally {
+        setInputLoadingState(false);
       }
     } else {
       // Show default greeting if no data uploaded yet
@@ -71,6 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function sendMessage(text) {
     chatTextInput.value = '';
+    
+    // Disable inputs while this query is in progress
+    setInputLoadingState(true);
     
     // 1. Render User Bubble
     appendMessage('user', text);
@@ -89,6 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       typingIndicator.remove();
       appendMessage('assistant', `Error getting response: ${err.message}`);
+    } finally {
+      setInputLoadingState(false);
     }
   }
 
@@ -119,7 +146,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const isUser = role === 'user';
     const avatarIcon = isUser ? 'user' : 'bot';
     
-    // Parse Markdown format into HTML
     const bubbleInner = isUser ? content : parseMarkdown(content);
 
     msgDiv.innerHTML = `
@@ -139,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chatMessagesContainer.appendChild(msgDiv);
     
-    // Add copy clipboard event listener
     if (!isUser) {
       const copyBtn = msgDiv.querySelector('.chat-bubble-copy');
       copyBtn.addEventListener('click', () => {
@@ -156,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
       window.lucide.createIcons();
     }
     
-    // Scroll container to bottom
     chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
   }
 
