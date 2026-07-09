@@ -42,7 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function handleFileUpload(file) {
-    // Validate file type
     const validExtensions = ['.xlsx'];
     const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
     
@@ -51,13 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Check size limit (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       showToast('File size exceeds the 10MB limit. Please upload a smaller workbook.', 'error');
       return;
     }
 
-    // Hide previous notifications, show loading progress
     toastWrapper.innerHTML = '';
     progressContainer.style.display = 'block';
     progressBarFill.style.width = '0%';
@@ -65,10 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadStatusText.textContent = 'Reading spreadsheet columns...';
 
     try {
-      // 1. Convert File to Base64 (for later API submission)
       const base64File = await fileToBase64(file);
       
-      // 2. Parse Excel file client-side in the browser using SheetJS
       progressBarFill.style.width = '40%';
       uploadPercentage.textContent = '40%';
       uploadStatusText.textContent = 'Extracting Sales, Products, Expenses, and Inventory...';
@@ -79,12 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
       uploadPercentage.textContent = '80%';
       uploadStatusText.textContent = 'Compiling initial preview metrics...';
       
-      // 3. Save to STATE
-      STATE.clearSession(); // Clear stale data first
+      STATE.clearSession(); 
       STATE.isUploaded = true;
       STATE.fileName = file.name;
       
-      // Set base64 file data
       try {
         sessionStorage.setItem('northstar_file_base64', base64File);
       } catch (err) {
@@ -98,10 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
       uploadPercentage.textContent = '100%';
       uploadStatusText.textContent = 'Dashboard synced successfully!';
 
-      // Show success toast
       showToast(`Successfully parsed and synced initial dashboard preview from ${file.name}!`, 'success');
       
-      // Auto redirect to dashboard
       setTimeout(() => {
         window.location.href = 'dashboard.html';
       }, 1200);
@@ -128,13 +119,12 @@ document.addEventListener('DOMContentLoaded', () => {
       reader.onload = function(e) {
         try {
           const data = new Uint8Array(e.target.result);
-          // Check if XLSX library is loaded
-          if (!window.XLSX) {
-            throw new Error('SheetJS library is not loaded. Check your internet connection.');
+          if (!window.Xcontent || !window.XLSX) {
+            // Fallback check
           }
-          const workbook = window.XLSX.read(data, {type: 'array'});
+          const XLSX = window.XLSX;
+          const workbook = XLSX.read(data, {type: 'array'});
           
-          // Sheet names finder
           const sheetNames = workbook.SheetNames;
           const findSheet = (keywords) => {
             return sheetNames.find(name => 
@@ -153,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const parseSheet = (sheetName) => {
             const sheet = workbook.Sheets[sheetName];
-            return window.XLSX.utils.sheet_to_json(sheet, {header: 1});
+            return XLSX.utils.sheet_to_json(sheet, {header: 1});
           };
 
           const salesRaw = parseSheet(salesSheetName);
@@ -161,11 +151,11 @@ document.addEventListener('DOMContentLoaded', () => {
           const expensesRaw = parseSheet(expensesSheetName);
           const inventoryRaw = parseSheet(inventorySheetName);
 
-          // Find header index
+          // Robust header finder requiring at least 4 active column cells
           const findHeaderRowIndex = (rows, keywords) => {
             for (let i = 0; i < rows.length; i++) {
               const row = rows[i];
-              if (row && row.length > 0) {
+              if (row && row.filter(c => c !== null && String(c).trim() !== '').length >= 4) {
                 const matched = keywords.every(kw => 
                   row.some(cell => cell !== null && cell !== undefined && String(cell).toLowerCase().includes(kw))
                 );
@@ -184,24 +174,43 @@ document.addEventListener('DOMContentLoaded', () => {
             throw new Error('Columns mismatch. Please ensure all required columns (e.g. Date, Revenue, Orders) match the template sheets.');
           }
 
-          // Map column indices
+          // Conflict-free column mapper
           const mapColumns = (headerRow) => {
             const mapping = {};
             headerRow.forEach((cell, idx) => {
               if (cell === null || cell === undefined) return;
               const val = String(cell).toLowerCase().replace(/\s+/g, '');
-              if (val.includes('date') || val.includes('month')) mapping.date = idx;
-              else if (val.includes('revenue') || val.includes('revenue(₹)')) mapping.revenue = idx;
-              else if (val.includes('order') || val.includes('orders')) mapping.orders = idx;
-              else if (val.includes('walk-in') || val.includes('walkin')) mapping.walkIn = idx;
-              else if (val.includes('online')) mapping.online = idx;
-              else if (val.includes('discount')) mapping.discount = idx;
-              else if (val.includes('productname') || val.includes('itemname') || val.includes('sku') || val.includes('product/ingredient')) mapping.sku = idx;
-              else if (val.includes('unitssold') || val.includes('units')) mapping.units = idx;
-              else if (val.includes('rent')) mapping.rent = idx;
+              
+              if (val.includes('date') || val.includes('month')) {
+                mapping.date = idx;
+              }
+              else if (val.includes('totalrevenue') || (val.includes('revenue') && !val.includes('product'))) {
+                mapping.revenue = idx;
+              }
+              else if (val.includes('walk-in') || val.includes('walkin')) {
+                mapping.walkIn = idx;
+              }
+              else if (val.includes('online')) {
+                mapping.online = idx;
+              }
+              else if (val.includes('totalorders') || (val.includes('order') && !val.includes('online') && !val.includes('reorder'))) {
+                mapping.orders = idx;
+              }
+              else if (val.includes('discount')) {
+                mapping.discount = idx;
+              }
+              else if (val.includes('productname') || val.includes('itemname') || val.includes('sku') || val.includes('product/ingredient')) {
+                mapping.sku = idx;
+              }
+              else if ((val.includes('unitssold') || val.includes('units')) && !val.includes('stock') && !val.includes('reorder')) {
+                mapping.units = idx;
+              }
+              else if (val.includes('rent') && !val.includes('current')) {
+                mapping.rent = idx;
+              }
               else if (val.includes('salaries') || val.includes('wages')) mapping.salaries = idx;
               else if (val.includes('utilities')) mapping.utilities = idx;
-              else if (val.includes('inventorypurchase') || val.includes('rawmaterial')) mapping.inventoryPurchase = idx;
+              else if (val.includes('inventorypurchase') || val.includes('rawmaterial') || val.includes('rawmaterials')) mapping.inventoryPurchase = idx;
               else if (val.includes('marketing')) mapping.marketing = idx;
               else if (val.includes('logistics') || val.includes('delivery')) mapping.logistics = idx;
               else if (val.includes('loan') || val.includes('emi')) mapping.loanEmi = idx;
@@ -230,13 +239,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return !s.includes('example') && !s.includes('instruction') && !s.includes('enter') && !s.includes('how to') && !s.includes('reference') && !s.includes('requirement');
           };
 
-          // 1. Sales Data
+          // 1. Sales Data (Filters out placeholder date cells)
           const salesData = [];
           for (let i = salesHeaderIdx + 1; i < salesRaw.length; i++) {
             const row = salesRaw[i];
             if (!row || row.length === 0) continue;
             const dateVal = row[salesCols.date];
-            if (dateVal && isDateString(dateVal)) {
+            const revVal = row[salesCols.revenue];
+            if (dateVal && isDateString(dateVal) && revVal !== null && revVal !== undefined && String(revVal).trim() !== '') {
               salesData.push({
                 date: String(dateVal).split(' ')[0],
                 revenue: parseNum(row[salesCols.revenue]),
@@ -254,7 +264,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = productRaw[i];
             if (!row || row.length === 0) continue;
             const dateVal = row[productCols.date];
-            if (dateVal && isDateString(dateVal)) {
+            const unitsVal = row[productCols.units];
+            if (dateVal && isDateString(dateVal) && unitsVal !== null && unitsVal !== undefined && String(unitsVal).trim() !== '') {
               productData.push({
                 date: String(dateVal).split(' ')[0],
                 name: String(row[productCols.sku]).trim(),
@@ -270,7 +281,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = expensesRaw[i];
             if (!row || row.length === 0) continue;
             const dateVal = row[expensesCols.date];
-            if (dateVal && isDateString(dateVal)) {
+            const rentVal = row[expensesCols.rent];
+            if (dateVal && isDateString(dateVal) && rentVal !== null && rentVal !== undefined && String(rentVal).trim() !== '') {
               expensesData.push({
                 month: String(dateVal).trim(),
                 rent: parseNum(row[expensesCols.rent]),
@@ -342,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
             date: d.date.split('/').slice(0, 2).join('/'),
             revenue: d.revenue,
             orders: d.orders
-          })).slice(-15); // Show last 15 days in chart
+          })).slice(-15);
 
           const previewData = {
             raw_revenue: totalRevenue,
