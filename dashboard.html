@@ -5,6 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Analytics Dashboard — Northstar Platform</title>
   <link rel="stylesheet" href="css/styles.css">
+  <script>
+    window.addEventListener('error', function(e) {
+      const errDiv = document.createElement('div');
+      errDiv.style = "position:fixed; top:0; left:0; width:100%; background:#ef4444; color:white; padding:15px; z-index:99999; font-family:monospace; font-size:13px; line-height:1.4; border-bottom:3px solid #b91c1c;";
+      errDiv.innerText = "Unhandle Error: " + e.message + "\nFile: " + e.filename + "\nLine: " + e.lineno + ":" + e.colno;
+      document.body.appendChild(errDiv);
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      const errDiv = document.createElement('div');
+      errDiv.style = "position:fixed; top:0; left:0; width:100%; background:#ef4444; color:white; padding:15px; z-index:99999; font-family:monospace; font-size:13px; line-height:1.4; border-bottom:3px solid #b91c1c;";
+      errDiv.innerText = "Promise Rejection: " + e.reason;
+      document.body.appendChild(errDiv);
+    });
+  </script>
 </head>
 <body>
 
