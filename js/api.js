@@ -232,7 +232,6 @@ function generateLocalMockReply(question, isFallback = false) {
   const secondProdName = products[1]?.name || 'Pizza';
   const secondProdRev = formatCurrency(products[1]?.revenue || 28500);
 
-  // Get dynamic expenses
   const rentAmt = STATE.dashboardData?.expenses_breakdown?.rent || 20000;
   const salariesAmt = STATE.dashboardData?.expenses_breakdown?.salaries || 30000;
   const formattedRent = formatCurrency(rentAmt);
@@ -251,7 +250,33 @@ However, your customer demand is strong:
 **Next Steps for the Owner:**
 1.  **Reduce Salaries:** Your payroll is too high relative to sales. Optimize your shift scheduling.
 2.  **Renegotiate Rent:** Speak to your landlord about lowering the rent or look for a lower-cost location.
-3.  **Halt Operations Option:** If you cannot bring down these fixed overheads within the next 30 days, then halting operations to stop further losses would be the safest decision.`;
+3.  **Halt Operations Option:** If you cannot bring down these fixed overheads within the next 14 days, then halting operations to stop further losses would be the safest decision.`;
+  }
+  else if (/\b(cashflow|cash\s+flow|critical|capital|liquidity|working\s+capital)\b/i.test(query)) {
+    replyText = `### Cashflow Analysis & Guidance
+**Analysis: Your cashflow requires immediate cost controls to build reserves.**
+
+*  **Revenues vs. Expenses**: You generated **${formattedRev}** against monthly outflows of **${formattedExp}**, leading to a net position of **${formattedProfit}**.
+*  **Why Cashflow is Critical**: Cashflow is the lifeblood of your daily operations. A business can be popular, but if fixed outflows (like salaries and rent) drain cash faster than sales bring it in, you will face liquidity shortages.
+*  **Action Item**: Target a cash buffer of at least 2 weeks of operating expenses to navigate mid-month supplier cycles safely.`;
+  }
+  else if (/\b(schedule|shift|cook|staff|employee|hour|labor|manpower|worker)\b/i.test(query)) {
+    replyText = `### Staff & Schedule Optimization
+**Analysis: Aligning kitchen staff hours with customer traffic peaks will save cash.**
+
+*  **Current Payroll**: Your total salaries cost is **${formattedSalaries}**.
+*  **Staffing Insights**: Review hourly order records to ensure you are not overstaffed during slow weekday afternoons.
+*  **Next Steps**:
+   *  Reduce 1 kitchen staff shift during slow weekday nights (saves roughly **${formatCurrency(salariesAmt * 0.1)}** monthly).
+   *  Cross-train staff to handle multiple stations during low-traffic hours.`;
+  }
+  else if (/\b(summarise|summarize|insight|action|todo|plan|recommendation|score)\b/i.test(query)) {
+    replyText = `### AI Business Strategy Summary
+**Top Actionable Insights for the Owner:**
+
+1.  **Reduce Operating Expenses**: Your overheads (**${formattedExp}**) are too high. Prioritize cutting salary costs and renegotiating rent.
+2.  **Double Down on High Performers**: **${topProdName}** is your primary driver, generating **${topProdRev}**. Keep this item fully stocked.
+3.  **Optimize Pricing**: Introduce combo deals combining **${topProdName}** and **${secondProdName}** to raise your average order values.`;
   }
   else if (/\b(current\s+sales|total\s+sales|historical\s+sales|actual\s+sales|sales\s+as\s+of|sales\s+so\s+far)\b/i.test(query)) {
     replyText = `### Current Sales & Orders Summary
@@ -297,7 +322,7 @@ Based on your uploaded logs, here are your key operational advantages:
 *  **Recommendation**: Combine ${topProdName} and ${secondProdName} as a combo deal with a small discount. This encourages customers to spend more per order.`;
   }
   else if (/\b(stock|inventory|cheese|slice|sku|low|alert|reorder|pizza\s+base)\b/i.test(query)) {
-    replyText = `### Inventory & Stock Alert
+    replyText = `### Inventory & Stock Alert`;ck Alert
 *  **Urgent Alert**: ${alertText}
 *  **What to do**: Order more **${lowStockItem?.sku || 'Pizza Base'}** immediately from your supplier (lead time is ${lowStockItem?.leadTime || 2} days) so you do not run out of stock and miss out on customer orders.
 *  All other inventory items are in stock.`;
