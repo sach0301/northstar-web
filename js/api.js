@@ -322,7 +322,7 @@ Based on your uploaded logs, here are your key operational advantages:
 *  **Recommendation**: Combine ${topProdName} and ${secondProdName} as a combo deal with a small discount. This encourages customers to spend more per order.`;
   }
   else if (/\b(stock|inventory|cheese|slice|sku|low|alert|reorder|pizza\s+base)\b/i.test(query)) {
-    replyText = `### Inventory & Stock Alert`;ck Alert
+    replyText = `### Inventory & Stock Alert
 *  **Urgent Alert**: ${alertText}
 *  **What to do**: Order more **${lowStockItem?.sku || 'Pizza Base'}** immediately from your supplier (lead time is ${lowStockItem?.leadTime || 2} days) so you do not run out of stock and miss out on customer orders.
 *  All other inventory items are in stock.`;
