@@ -601,8 +601,41 @@ document.addEventListener('DOMContentLoaded', () => {
       opportunities: swotBlock.Opportunities || ['Promote combos', 'Slightly adjust prices'],
       risks: swotBlock.Risks || ['Inventory decay', 'Supplier dependency'],
       actions: recList.map((item, idx) => {
-        const title = typeof item === 'string' ? item.split(':')[0] || 'Recommendation Hint' : item.title || '';
-        const desc = typeof item === 'string' ? item : item.desc || '';
+        let title = 'Recommendation Hint';
+        let desc = '';
+        
+        if (typeof item === 'string') {
+          if (item.includes(':')) {
+            const parts = item.split(':');
+            title = parts[0].trim();
+            desc = parts.slice(1).join(':').trim();
+          } else {
+            // Generate clean title based on standard patterns
+            const lower = item.toLowerCase();
+            if (lower.includes('production and marketing')) title = 'Production & Marketing';
+            else if (lower.includes('pricing strategy') || lower.includes('optimize pricing')) title = 'Pricing Strategy';
+            else if (lower.includes('online marketing')) title = 'Online Marketing';
+            else if (lower.includes('reduce total expenses') || lower.includes('expenses')) title = 'Expense Management';
+            else if (lower.includes('sales forecast')) title = 'Sales Forecasting';
+            else if (lower.includes('sales volatility') || lower.includes('volatility')) title = 'Sales Volatility';
+            else if (lower.includes('just-in-time') || lower.includes('inventory')) title = 'Inventory Optimization';
+            else if (lower.includes('targeted marketing')) title = 'Targeted Marketing';
+            else if (lower.includes('optimize the menu') || lower.includes('menu')) title = 'Menu Optimization';
+            else if (lower.includes('fixed costs')) title = 'Fixed Cost Management';
+            else if (lower.includes('data analytics') || lower.includes('analytics')) title = 'Analytics Investment';
+            else if (lower.includes('overstock')) title = 'Overstock Liquidation';
+            else if (lower.includes('customer retention') || lower.includes('retention')) title = 'Customer Retention';
+            else {
+              const words = item.split(' ');
+              title = words.length > 4 ? words.slice(0, 4).join(' ') : item;
+            }
+            desc = item;
+          }
+        } else {
+          title = item.title || 'Recommendation Hint';
+          desc = item.desc || '';
+        }
+        
         return {
           title: title,
           desc: desc,
